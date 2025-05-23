@@ -1,0 +1,27 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
+name = "comeback"
+handle = "comeback-3"
+application_url = "https://poet-poem-acts-ozone.trycloudflare.com"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = ""
+
+[auth]
+redirect_urls = [
+  "https://poet-poem-acts-ozone.trycloudflare.com/auth/callback",
+  "https://poet-poem-acts-ozone.trycloudflare.com/auth/shopify/callback",
+  "https://poet-poem-acts-ozone.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
