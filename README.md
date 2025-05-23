@@ -195,3 +195,8 @@ uvicorn backend.main:app --reload
 
 It exposes `/dashboard/overview` which returns loyalty metrics calculated from `backend/mock_data.py`.
 
+<<<<<<< HEAD
+=======
+
+The Next.js app includes a simple dashboard page at `/dashboard` that fetches these metrics from the FastAPI server. Start both the FastAPI backend and the Next.js dev server to see the data rendered in the app.
+>>>>>>> main
