@@ -184,3 +184,16 @@ how to set up Prisma, see the
 - [App authentication](https://shopify.dev/apps/auth)
 - [Shopify CLI](https://shopify.dev/apps/tools/cli)
 - [Shopify API Library documentation](https://github.com/Shopify/shopify-api-node/tree/main/docs)
+
+## FastAPI Mock Backend
+
+A small FastAPI service with mock data is located in the `backend` directory. Run it locally with:
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+It exposes `/dashboard/overview` which returns loyalty metrics calculated from `backend/mock_data.py`.
+
+
+The Next.js app includes a simple dashboard page at `/dashboard` that fetches these metrics from the FastAPI server. Start both the FastAPI backend and the Next.js dev server to see the data rendered in the app.
