@@ -20,6 +20,9 @@
     "template"
   ],
   "dependencies": {
+    "@shopify/app-bridge": "^3.7.10",
+    "@shopify/app-bridge-react": "^4.1.10",
+    "@shopify/polaris": "^13.9.5",
     "prettier": "^3.2.5"
   }
 }
