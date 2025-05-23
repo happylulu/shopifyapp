@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import calendar
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .services import (
     get_total_points_issued,
@@ -11,6 +12,15 @@ from .services import (
 )
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def first_day_of_month(dt: datetime) -> datetime:

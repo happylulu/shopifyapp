@@ -3,11 +3,12 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://poet-poem-acts-ozone.trycloudflare.com"
+application_url = "https://network-republican-entering-municipal.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -18,9 +19,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://poet-poem-acts-ozone.trycloudflare.com/auth/callback",
-  "https://poet-poem-acts-ozone.trycloudflare.com/auth/shopify/callback",
-  "https://poet-poem-acts-ozone.trycloudflare.com/api/auth/callback"
+  "https://network-republican-entering-municipal.trycloudflare.com/auth/callback",
+  "https://network-republican-entering-municipal.trycloudflare.com/auth/shopify/callback",
+  "https://network-republican-entering-municipal.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
