@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Page, Card, Text } from "@shopify/polaris";
+import AppLayout from "../components/AppLayout";
 
 interface Metric {
   value: number;
@@ -32,44 +33,58 @@ export default function DashboardClient() {
   }, []);
 
   return (
-    <Page title="Dashboard">
-      {!data && <p>Loading...</p>}
-      {data && (
-        <>
-          <Card title="Total Points Issued" sectioned>
-            <Text as="h2" variant="headingSm">
-              {data.total_points_issued.value}
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Change: {data.total_points_issued.percent_change ?? "N/A"}%
-            </Text>
-          </Card>
-          <Card title="Active Members" sectioned>
-            <Text as="h2" variant="headingSm">
-              {data.active_members.value}
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Change: {data.active_members.percent_change ?? "N/A"}%
-            </Text>
-          </Card>
-          <Card title="Points Redeemed" sectioned>
-            <Text as="h2" variant="headingSm">
-              {data.points_redeemed.value}
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Change: {data.points_redeemed.percent_change ?? "N/A"}%
-            </Text>
-          </Card>
-          <Card title="Revenue Impact" sectioned>
-            <Text as="h2" variant="headingSm">
-              ${data.revenue_impact.value.toFixed(2)}
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Change: {data.revenue_impact.percent_change ?? "N/A"}%
-            </Text>
-          </Card>
-        </>
-      )}
-    </Page>
+    <AppLayout>
+      <Page title="Dashboard">
+        {!data && <p>Loading...</p>}
+        {data && (
+          <>
+            <Card>
+              <Text as="h2" variant="headingMd">
+                Total Points Issued
+              </Text>
+              <Text as="h3" variant="headingSm">
+                {data.total_points_issued.value}
+              </Text>
+              <Text as="p" variant="bodyMd">
+                Change: {data.total_points_issued.percent_change ?? "N/A"}%
+              </Text>
+            </Card>
+            <Card>
+              <Text as="h2" variant="headingMd">
+                Active Members
+              </Text>
+              <Text as="h3" variant="headingSm">
+                {data.active_members.value}
+              </Text>
+              <Text as="p" variant="bodyMd">
+                Change: {data.active_members.percent_change ?? "N/A"}%
+              </Text>
+            </Card>
+            <Card>
+              <Text as="h2" variant="headingMd">
+                Points Redeemed
+              </Text>
+              <Text as="h3" variant="headingSm">
+                {data.points_redeemed.value}
+              </Text>
+              <Text as="p" variant="bodyMd">
+                Change: {data.points_redeemed.percent_change ?? "N/A"}%
+              </Text>
+            </Card>
+            <Card>
+              <Text as="h2" variant="headingMd">
+                Revenue Impact
+              </Text>
+              <Text as="h3" variant="headingSm">
+                ${data.revenue_impact.value.toFixed(2)}
+              </Text>
+              <Text as="p" variant="bodyMd">
+                Change: {data.revenue_impact.percent_change ?? "N/A"}%
+              </Text>
+            </Card>
+          </>
+        )}
+      </Page>
+    </AppLayout>
   );
 }

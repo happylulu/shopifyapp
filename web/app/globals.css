@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Ensure Polaris components display properly */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Fix any potential conflicts between Tailwind and Polaris */
+.Polaris-Card {
+  background-color: var(--p-color-bg-surface) !important;
+}
+
+.Polaris-Button--primary {
+  background-color: var(--p-color-bg-primary) !important;
+}

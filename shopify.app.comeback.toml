@@ -3,7 +3,7 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://network-republican-entering-municipal.trycloudflare.com"
+application_url = "https://protect-televisions-symposium-easily.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://network-republican-entering-municipal.trycloudflare.com/auth/callback",
-  "https://network-republican-entering-municipal.trycloudflare.com/auth/shopify/callback",
-  "https://network-republican-entering-municipal.trycloudflare.com/api/auth/callback"
+  "https://protect-televisions-symposium-easily.trycloudflare.com/auth/callback",
+  "https://protect-televisions-symposium-easily.trycloudflare.com/auth/shopify/callback",
+  "https://protect-televisions-symposium-easily.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

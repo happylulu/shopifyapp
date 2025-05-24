@@ -8,7 +8,10 @@ import { TanstackProvider } from "./tanstack-provider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AppProvider i18n={translations}>
+    <AppProvider 
+      i18n={translations}
+      theme="light"
+    >
       <TanstackProvider>
         <SessionProvider>{children}</SessionProvider>
       </TanstackProvider>
@@ -17,5 +20,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 }
 
 export function ExitProvider({ children }: { children: React.ReactNode }) {
-  return <AppProvider i18n={translations}>{children}</AppProvider>;
+  return (
+    <AppProvider 
+      i18n={translations}
+      theme="light"
+    >
+      {children}
+    </AppProvider>
+  );
 }
