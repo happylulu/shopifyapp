@@ -66,3 +66,47 @@ ORDERS = [
         "created_at": datetime(2025, 4, 5, 11, 0, 0, tzinfo=timezone.utc),
     },
 ]
+
+def get_dashboard_data():
+    """Get mock dashboard overview data"""
+    return {
+        "total_points_issued": {
+            "value": 2500,
+            "percent_change": 15.2,
+        },
+        "active_members": {
+            "value": 324,
+            "percent_change": 8.7,
+        },
+        "points_redeemed": {
+            "value": 1800,
+            "percent_change": -3.1,
+        },
+        "revenue_impact": {
+            "value": 12750.50,
+            "percent_change": 22.4,
+        },
+    }
+
+def get_points_program_data():
+    """Get mock points program settings data"""
+    return {
+        "points_per_dollar": 10,
+        "point_value": 0.01,
+        "earning_options": {
+            "purchase": {"enabled": True, "points": 10},
+            "signup": {"enabled": True, "points": 100},
+            "birthday": {"enabled": True, "points": 250},
+            "social_share": {"enabled": True, "points": 50},
+        },
+        "redemption_options": [
+            {"name": "$10 off", "points_required": 1000},
+            {"name": "15% off", "points_required": 1500},
+            {"name": "Free shipping", "points_required": 500},
+            {"name": "Free product", "points_required": 2000},
+        ],
+        "program_rules": {
+            "points_expiration": {"enabled": True, "months": 12},
+            "minimum_redemption": {"enabled": True, "points": 100},
+        }
+    }

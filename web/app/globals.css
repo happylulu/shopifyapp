@@ -2,17 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Ensure Polaris components display properly */
+/* Import Polaris CSS variables and color tokens */
+@import url('@shopify/polaris/build/esm/styles.css');
+
+/* Enhanced Green & Orange Theme Variables */
+:root {
+  /* Primary Green Theme */
+  --p-color-bg-surface: #ffffff;
+  --p-color-bg-surface-secondary: #f0f9f0;
+  --p-color-bg-primary: #22c55e;
+  --p-color-bg-primary-hover: #16a34a;
+  --p-color-bg-success: #dcfce7;
+  --p-color-text-success: #15803d;
+  
+  /* Orange Accent Colors */
+  --p-color-bg-warning: #fed7aa;
+  --p-color-text-warning: #ea580c;
+  --p-color-bg-orange: #fb923c;
+  --p-color-bg-orange-hover: #f97316;
+  
+  /* Text and Border Colors */
+  --p-color-text: #1f2937;
+  --p-color-text-secondary: #6b7280;
+  --p-color-border: #e5e7eb;
+  --p-color-border-success: #22c55e;
+  
+  /* Spacing */
+  --p-space-400: 1rem;
+  --p-space-500: 1.25rem;
+  --p-space-600: 1.5rem;
+  --p-border-radius-200: 12px;
+}
+
+/* Enhanced body styling */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  @apply bg-gray-50 min-h-screen;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f9f0 0%, #ffffff 100%);
+  color: var(--p-color-text, #1f2937);
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
-/* Fix any potential conflicts between Tailwind and Polaris */
+/* Enhanced Polaris Cards with Colors */
 .Polaris-Card {
-  background-color: var(--p-color-bg-surface) !important;
+  background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%) !important;
+  border: 2px solid var(--p-color-border, #e5e7eb) !important;
+  border-radius: var(--p-border-radius-200, 12px) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.3s ease !important;
 }
 
+.Polaris-Card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Primary Green Buttons */
 .Polaris-Button--primary {
-  background-color: var(--p-color-bg-primary) !important;
+  background: linear-gradient(135deg, var(--p-color-bg-primary, #22c55e) 0%, var(--p-color-bg-primary-hover, #16a34a) 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.Polaris-Button--primary:hover {
+  background: linear-gradient(135deg, var(--p-color-bg-primary-hover, #16a34a) 0%, #15803d 100%) !important;
+  box-shadow: 0 6px 8px -1px rgba(34, 197, 94, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Orange Secondary Buttons */
+.Polaris-Button--secondary {
+  background: linear-gradient(135deg, var(--p-color-bg-orange, #fb923c) 0%, var(--p-color-bg-orange-hover, #f97316) 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 6px -1px rgba(251, 146, 60, 0.3) !important;
+}
+
+.Polaris-Button--secondary:hover {
+  background: linear-gradient(135deg, var(--p-color-bg-orange-hover, #f97316) 0%, #ea580c 100%) !important;
+  box-shadow: 0 6px 8px -1px rgba(251, 146, 60, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Enhanced Tabs with Green Theme */
+.Polaris-Tabs__Tab--selected {
+  color: var(--p-color-bg-primary, #22c55e) !important;
+  border-bottom: 3px solid var(--p-color-bg-primary, #22c55e) !important;
+  background: linear-gradient(135deg, #f0f9f0 0%, #ffffff 100%) !important;
+  font-weight: 600 !important;
+}
+
+.Polaris-Tabs__Tab {
+  transition: all 0.3s ease !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.Polaris-Tabs__Tab:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+/* Enhanced Box components with colors */
+.Polaris-Box[data-polaris-bg="bg-surface-secondary"] {
+  background: linear-gradient(135deg, #f0f9f0 0%, #ecfdf5 100%) !important;
+  border: 1px solid #d1fae5 !important;
+  border-radius: 12px !important;
+}
+
+/* Colorful Success Badges */
+.Polaris-Badge--toneSuccess {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+  color: #15803d !important;
+  border: 1px solid #86efac !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+}
+
+/* Orange Warning Badges */
+.Polaris-Badge--toneWarning {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%) !important;
+  color: #ea580c !important;
+  border: 1px solid #fb923c !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+}
+
+/* Critical/Error Badges */
+.Polaris-Badge--toneCritical {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%) !important;
+  color: #dc2626 !important;
+  border: 1px solid #f87171 !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+}
+
+/* Enhanced Icons with colors */
+.Polaris-Icon {
+  fill: currentColor !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+}
+
+/* Green-themed checkboxes */
+.Polaris-Checkbox__Input:checked + .Polaris-Checkbox__Backdrop {
+  background-color: var(--p-color-bg-primary, #22c55e) !important;
+  border-color: var(--p-color-bg-primary, #22c55e) !important;
+}
+
+/* Enhanced TextField styling */
+.Polaris-TextField__Input:focus {
+  border-color: var(--p-color-bg-primary, #22c55e) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+}
+
+/* Page header styling */
+.Polaris-Page__Header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 1.5rem !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Enhanced spacing and layout */
+.Polaris-Page {
+  padding: var(--p-space-500, 1.25rem) !important;
+  background: transparent !important;
+}
+
+/* Custom gradient backgrounds for special sections */
+.earning-options-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f9f0 100%) !important;
+  border: 2px solid #d1fae5 !important;
+}
+
+.value-config-card {
+  background: linear-gradient(145deg, #ffffff 0%, #fff7ed 100%) !important;
+  border: 2px solid #fed7aa !important;
 }

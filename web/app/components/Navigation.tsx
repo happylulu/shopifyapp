@@ -22,6 +22,11 @@ export default function AppNavigation() {
       label: "Points Program", 
       selected: pathname === "/points-program",
     },
+    {
+      url: "/referrals",
+      label: "Referrals", 
+      selected: pathname === "/referrals",
+    },
   ];
 
   return (
