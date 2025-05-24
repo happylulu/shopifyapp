@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Page, Card, Text } from "@shopify/polaris";
+import { Page, Card, Text, Badge, BlockStack, InlineStack } from "@shopify/polaris";
 import AppLayout from "../components/AppLayout";
 
 interface Metric {
@@ -35,54 +35,85 @@ export default function DashboardClient() {
   return (
     <AppLayout>
       <Page title="Dashboard">
-        {!data && <p>Loading...</p>}
+        {!data && <Text as="p" variant="bodyMd">Loading...</Text>}
         {data && (
-          <>
-            <Card>
-              <Text as="h2" variant="headingMd">
-                Total Points Issued
-              </Text>
-              <Text as="h3" variant="headingSm">
-                {data.total_points_issued.value}
-              </Text>
-              <Text as="p" variant="bodyMd">
-                Change: {data.total_points_issued.percent_change ?? "N/A"}%
-              </Text>
-            </Card>
-            <Card>
-              <Text as="h2" variant="headingMd">
-                Active Members
-              </Text>
-              <Text as="h3" variant="headingSm">
-                {data.active_members.value}
-              </Text>
-              <Text as="p" variant="bodyMd">
-                Change: {data.active_members.percent_change ?? "N/A"}%
-              </Text>
-            </Card>
-            <Card>
-              <Text as="h2" variant="headingMd">
-                Points Redeemed
-              </Text>
-              <Text as="h3" variant="headingSm">
-                {data.points_redeemed.value}
-              </Text>
-              <Text as="p" variant="bodyMd">
-                Change: {data.points_redeemed.percent_change ?? "N/A"}%
-              </Text>
-            </Card>
-            <Card>
-              <Text as="h2" variant="headingMd">
-                Revenue Impact
-              </Text>
-              <Text as="h3" variant="headingSm">
-                ${data.revenue_impact.value.toFixed(2)}
-              </Text>
-              <Text as="p" variant="bodyMd">
-                Change: {data.revenue_impact.percent_change ?? "N/A"}%
-              </Text>
-            </Card>
-          </>
+          <BlockStack gap="400">
+            <InlineStack gap="400">
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">Total Points Issued</Text>
+                  <Text as="h2" variant="headingLg">
+                    {data.total_points_issued.value.toLocaleString()}
+                  </Text>
+                  <Badge
+                    tone={
+                      (data.total_points_issued.percent_change ?? 0) >= 0
+                        ? "success"
+                        : "critical"
+                    }
+                  >
+                    {`${data.total_points_issued.percent_change ?? "N/A"}%`}
+                  </Badge>
+                </BlockStack>
+              </Card>
+              
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">Active Members</Text>
+                  <Text as="h2" variant="headingLg">
+                    {data.active_members.value.toLocaleString()}
+                  </Text>
+                  <Badge
+                    tone={
+                      (data.active_members.percent_change ?? 0) >= 0
+                        ? "success"
+                        : "critical"
+                    }
+                  >
+                    {`${data.active_members.percent_change ?? "N/A"}%`}
+                  </Badge>
+                </BlockStack>
+              </Card>
+            </InlineStack>
+            
+            <InlineStack gap="400">
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">Points Redeemed</Text>
+                  <Text as="h2" variant="headingLg">
+                    {data.points_redeemed.value.toLocaleString()}
+                  </Text>
+                  <Badge
+                    tone={
+                      (data.points_redeemed.percent_change ?? 0) >= 0
+                        ? "success"
+                        : "critical"
+                    }
+                  >
+                    {`${data.points_redeemed.percent_change ?? "N/A"}%`}
+                  </Badge>
+                </BlockStack>
+              </Card>
+              
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">Revenue Impact</Text>
+                  <Text as="h2" variant="headingLg">
+                    ${data.revenue_impact.value.toFixed(2)}
+                  </Text>
+                  <Badge
+                    tone={
+                      (data.revenue_impact.percent_change ?? 0) >= 0
+                        ? "success"
+                        : "critical"
+                    }
+                  >
+                    {`${data.revenue_impact.percent_change ?? "N/A"}%`}
+                  </Badge>
+                </BlockStack>
+              </Card>
+            </InlineStack>
+          </BlockStack>
         )}
       </Page>
     </AppLayout>

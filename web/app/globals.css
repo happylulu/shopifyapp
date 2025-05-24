@@ -5,6 +5,7 @@
 /* Ensure Polaris components display properly */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  @apply bg-gray-50 min-h-screen;
 }
 
 /* Fix any potential conflicts between Tailwind and Polaris */
