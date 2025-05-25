@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List
 
-from mock_data import POINT_TRANSACTIONS, REWARD_REDEMPTIONS, ORDERS
+from mock_data import POINT_TRANSACTIONS, REWARD_REDEMPTIONS
+from shopify_api import get_orders
 
 
 class PointsService:
@@ -36,10 +37,9 @@ class PointsService:
         # get discount codes issued via reward redemptions
         codes = {r["discount_code"] for r in REWARD_REDEMPTIONS}
         revenue = 0.0
-        for order in ORDERS:
-            if start <= order["created_at"] <= end:
-                if any(code in codes for code in order["discount_codes_used"]):
-                    revenue += float(order["total_amount"])
+        for order in get_orders(start, end):
+            if any(code in codes for code in order.get("discount_codes_used", [])):
+                revenue += float(order.get("total_amount", 0.0))
         return revenue
 
 
@@ -76,8 +76,7 @@ def get_revenue_impact(start: datetime, end: datetime) -> float:
     # get discount codes issued via reward redemptions
     codes = {r["discount_code"] for r in REWARD_REDEMPTIONS}
     revenue = 0.0
-    for order in ORDERS:
-        if start <= order["created_at"] <= end:
-            if any(code in codes for code in order["discount_codes_used"]):
-                revenue += float(order["total_amount"])
+    for order in get_orders(start, end):
+        if any(code in codes for code in order.get("discount_codes_used", [])):
+            revenue += float(order.get("total_amount", 0.0))
     return revenue
