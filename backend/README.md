@@ -1,6 +1,6 @@
 # Shopify App Backend
 
-A FastAPI-based backend service for a comprehensive Shopify app featuring Points Program, VIP Tiers, Referrals, and AI-powered Customer Insights.
+A FastAPI-based backend service for a comprehensive Shopify app featuring Points Program, VIP Tiers, Referrals, AI-powered Customer Insights, and VIP Events.
 
 ## 🚀 Features
 
@@ -33,7 +33,15 @@ A FastAPI-based backend service for a comprehensive Shopify app featuring Points
 - Sentiment analysis
 - Revenue forecasting
 
-### 5. **Dashboard & Analytics**
+### 5. **VIP Events & AI-Targeted Campaigns**
+- Schedule targeted loyalty events
+- Target specific VIP tiers and AI segments
+- Multiple reward types (points multipliers, bonuses, discounts)
+- Event timeline and calendar views
+- Performance analytics and ROI tracking
+- Auto-enrollment and notification options
+
+### 6. **Dashboard & Analytics**
 - Real-time metrics tracking
 - Customer lifetime value analysis
 - Revenue analytics
@@ -128,6 +136,16 @@ python start_server.py
 - `GET /ai/insights/predictions` - Predictive analytics
 - `GET /ai/insights/recommendations` - AI recommendations
 
+### VIP Events
+- `GET /events` - List all events with optional status filter
+- `POST /events` - Create new VIP event
+- `GET /events/{event_id}` - Get specific event details
+- `PUT /events/{event_id}` - Update event
+- `DELETE /events/{event_id}` - Delete event
+- `GET /events/{event_id}/analytics` - Get event analytics
+- `GET /events/calendar/view` - Get calendar view of events
+- `GET /events/targets/available` - Get available VIP tiers and AI segments
+
 ### Dashboard
 - `GET /dashboard/overview` - Dashboard overview metrics
 - `GET /dashboard/charts/revenue` - Revenue chart data
@@ -144,6 +162,8 @@ backend/
 ├── mock_data.py           # Mock data generation
 ├── vip_models.py          # VIP tier models
 ├── vip_service.py         # VIP tier business logic
+├── event_models.py        # VIP event models
+├── event_service.py       # VIP event business logic
 ├── ai_models.py           # AI insight models
 ├── ai_service.py          # AI insight logic
 ├── referral_service.py    # Referral system logic
@@ -169,30 +189,85 @@ The VIP program includes 4 default tiers:
 
 ## 🧪 Testing
 
-### Test imports:
-```bash
-python test_imports.py
-```
+You can test the API endpoints using curl or any API client:
 
-### Test endpoints:
 ```bash
 # Health check
 curl http://localhost:8000/health
 
-# Get VIP config
-curl http://localhost:8000/vip/config
+# Get dashboard overview
+curl http://localhost:8000/dashboard/overview
 
-# Get points balance
-curl http://localhost:8000/points/balance/cust_001
+# Get VIP members
+curl http://localhost:8000/vip/members
 ```
 
-## 📊 Mock Data
+## Seeding Shopify Data
 
-The backend includes mock data generators for testing:
-- 8 VIP members across all tiers
-- Sample transactions and activities
-- Customer segments and insights
-- Referral campaigns
+The backend includes scripts to populate your Shopify development store with test customers and orders:
+
+### Quick Start
+
+1. **Run the simple seeder script:**
+   ```bash
+   cd backend
+   python seed_shopify_simple.py
+   ```
+
+2. **Follow the prompts to:**
+   - Get your Shopify access token
+   - Choose how many customers to create
+   - The script will create customers with VIP tiers and tags
+
+### Getting a Shopify Access Token
+
+**Option 1: Through your Shopify App (Recommended)**
+1. Go to your Shopify admin: https://petcocolulu.myshopify.com/admin
+2. Navigate to: Settings → Apps and sales channels
+3. Click on your "comeback" app
+4. Go to the "API credentials" tab
+5. Under "Admin API access token", click "Reveal token"
+
+**Option 2: Create a Private App**
+1. In Shopify admin, go to: Settings → Apps and sales channels
+2. Click "Develop apps" (enable it if needed)
+3. Create a new app
+4. Configure Admin API scopes:
+   - `read_customers`, `write_customers`
+   - `read_orders`, `write_orders`
+   - `read_products`
+5. Install the app and get the access token
+
+### Advanced Seeding
+
+For more control, use the full seeder script:
+
+```bash
+# Edit the script first to add your access token
+nano shopify_customer_seeder.py
+
+# Then run it
+python shopify_customer_seeder.py
+```
+
+This script will:
+- Create 50 customers with realistic data
+- Assign VIP tiers based on spending
+- Create 1-5 orders per customer
+- Add loyalty points and metafields
+- Tag customers with segments
+
+### Seeded Data Structure
+
+Each customer will have:
+- **VIP Tier**: platinum, gold, silver, bronze, or none
+- **Tags**: `vip_[tier]`, `test_customer`, segment tags
+- **Note**: Contains VIP status and lifetime value
+- **Metafields** (if using advanced seeder):
+  - `loyalty.points_balance`: Current points
+  - `vip.tier`: VIP tier level
+  - `vip.lifetime_value`: Total spent
+  - `vip.join_date`: Member since date
 
 ## 🔒 Security Notes
 
