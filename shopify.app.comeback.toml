@@ -3,25 +3,25 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://hurricane-distinguished-thousand-asin.trycloudflare.com"
+application_url = "https://myth-signs-kg-trend.trycloudflare.com"
 embedded = true
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
+scopes = "read_products,read_orders,write_orders,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://hurricane-distinguished-thousand-asin.trycloudflare.com/auth/callback",
-  "https://hurricane-distinguished-thousand-asin.trycloudflare.com/auth/shopify/callback",
-  "https://hurricane-distinguished-thousand-asin.trycloudflare.com/api/auth/callback"
+  "https://myth-signs-kg-trend.trycloudflare.com/auth/callback",
+  "https://myth-signs-kg-trend.trycloudflare.com/auth/shopify/callback",
+  "https://myth-signs-kg-trend.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
