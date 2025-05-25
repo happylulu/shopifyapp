@@ -54,6 +54,8 @@ A FastAPI-based backend service for a comprehensive Shopify app featuring Points
 - Uvicorn
 - Pydantic
 - python-dateutil
+- SQLAlchemy
+- asyncpg
 
 ## 🛠️ Installation
 
@@ -71,7 +73,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. Install dependencies:
 ```bash
-pip install fastapi uvicorn pydantic python-dateutil
+pip install fastapi uvicorn pydantic python-dateutil sqlalchemy asyncpg
+```
+
+4. Create a `.env` file in the `backend` directory and add your database URL:
+```env
+DATABASE_URL=postgresql+asyncpg://neondb_owner:npg_nTXijxMf0yL9@ep-divine-snow-a8px2qp1-pooler.eastus2.azure.neon.tech/shopify?sslmode=require
 ```
 
 ## 🚀 Running the Server
@@ -273,7 +280,8 @@ Each customer will have:
 
 **⚠️ Important**: This is a development server with mock data. For production:
 1. Implement proper authentication (OAuth, JWT)
-2. Add database integration (PostgreSQL, MongoDB)
+2. Add a multi-tenant database (PostgreSQL, MongoDB) with `shop_id` on every table
+   and handle the `app/uninstalled` webhook to purge a shop's data
 3. Implement rate limiting
 4. Add input validation and sanitization
 5. Use environment variables for configuration

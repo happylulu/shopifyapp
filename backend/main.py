@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict, Any
 import uvicorn
 from datetime import datetime
+import asyncio
+
+# Database helpers for multi-tenancy
+from database import init_db, purge_shop_data
 
 # Import existing models and services
 from mock_data import get_dashboard_data, get_points_program_data
@@ -43,6 +47,9 @@ points_service = PointsService()
 referral_service = ReferralService()
 ai_service = AIInsightsService()  # New AI service
 vip_service = VIPService()  # New VIP service
+
+# Initialize database tables for multi-tenant storage
+asyncio.run(init_db())
 
 # Helper function to extract shop domain from headers (Shopify app pattern)
 def get_shop_domain(request: Request) -> str:
@@ -366,6 +373,17 @@ async def get_vip_analytics(request: Request):
         return response
     else:
         raise HTTPException(status_code=500, detail=response.error)
+
+# ---------------------------------------------------------------------------
+# Webhook: app/uninstalled
+# ---------------------------------------------------------------------------
+
+@app.post("/webhooks/app_uninstalled")
+async def app_uninstalled(request: Request):
+    """Handle Shopify APP_UNINSTALLED webhook and purge merchant data."""
+    shop_domain = get_shop_domain(request)
+    await purge_shop_data(shop_domain)
+    return {"success": True}
 
 # Health check endpoint
 @app.get("/health")
