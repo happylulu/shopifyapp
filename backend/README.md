@@ -78,7 +78,12 @@ pip install fastapi uvicorn pydantic python-dateutil sqlalchemy asyncpg
 
 4. Create a `.env` file in the `backend` directory and add your database URL:
 ```env
-DATABASE_URL=postgresql+asyncpg://neondb_owner:npg_nTXijxMf0yL9@ep-divine-snow-a8px2qp1-pooler.eastus2.azure.neon.tech/shopify?sslmode=require
+DATABASE_URL=postgresql+asyncpg://neondb_owner:npg_nTXijxMf0yL9@ep-divine-snow-a8px2qp1-pooler.eastus2.azure.neon.tech/shopify?ssl=require
+```
+
+5. Initialize the database with migrations:
+```bash
+python init_db_with_migrations.py
 ```
 
 ## 🚀 Running the Server
@@ -103,6 +108,34 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 python kill_port_8000.py
 python start_server.py
 ```
+
+## 🗃️ Database Migrations
+
+This project uses Alembic for database schema management. The migration system provides:
+- Version control for database schema changes
+- Safe schema updates with rollback capability
+- Automatic migration generation from model changes
+
+### Quick Migration Commands
+
+```bash
+# Create a new migration after changing models
+python migrate.py create "Add new column to users table"
+
+# Apply all pending migrations
+python migrate.py upgrade
+
+# Rollback one migration
+python migrate.py downgrade -1
+
+# Check current migration status
+python migrate.py current
+
+# View migration history
+python migrate.py history
+```
+
+For detailed migration documentation, see [MIGRATIONS.md](MIGRATIONS.md).
 
 ## 📡 API Endpoints
 
@@ -370,4 +403,4 @@ This project is part of a Shopify app development example.
 
 ---
 
-For more information or support, please refer to the main project documentation. 
+For more information or support, please refer to the main project documentation.

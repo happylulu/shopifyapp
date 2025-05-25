@@ -25,7 +25,7 @@ from sqlalchemy.orm import declarative_base
 # Default Neon connection string with asyncpg driver
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://neondb_owner:npg_nTXijxMf0yL9@ep-divine-snow-a8px2qp1-pooler.eastus2.azure.neon.tech/shopify?sslmode=require",
+    "postgresql+asyncpg://neondb_owner:npg_nTXijxMf0yL9@ep-divine-snow-a8px2qp1-pooler.eastus2.azure.neon.tech/shopify?ssl=require",
 )
 
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -60,6 +60,7 @@ class LoyaltyPoint(Base):
     shop_id = Column(Integer, ForeignKey("shops.id"))
     customer_id = Column(String)
     points = Column(Integer)
+    reason = Column(String, nullable=True)  # New column for tracking point source
     created_at = Column(DateTime, server_default=func.now())
 
 
@@ -90,9 +91,57 @@ class VIPMember(Base):
 
 
 async def init_db() -> None:
-    """Create all tables asynchronously."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    """Initialize database using migrations.
+
+    Note: This function now serves as a compatibility layer.
+    For new deployments, use the migration system:
+    - python init_db_with_migrations.py (for initial setup)
+    - python migrate.py upgrade (for applying migrations)
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    backend_dir = Path(__file__).parent
+
+    try:
+        # Check if alembic is available and migrations exist
+        result = subprocess.run(
+            ["alembic", "current"],
+            cwd=backend_dir,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode == 0:
+            # Alembic is available, use migrations
+            print("🔄 Using migration system to initialize database...")
+            upgrade_result = subprocess.run(
+                ["alembic", "upgrade", "head"],
+                cwd=backend_dir,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if upgrade_result.returncode == 0:
+                print("✅ Database initialized with migrations!")
+            else:
+                print(f"⚠️  Migration failed: {upgrade_result.stderr}")
+                print("Falling back to create_all()...")
+                async with engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+        else:
+            # Alembic not available or no migrations, use create_all
+            print("⚠️  Alembic not available, using create_all()...")
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+
+    except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
+        print(f"⚠️  Migration system unavailable ({e}), using create_all()...")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
 
 @asynccontextmanager
