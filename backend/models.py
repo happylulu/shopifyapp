@@ -85,6 +85,21 @@ class CreateReferralLinkRequest(BaseModel):
     customer_name: str = Field(..., description="Customer name")
     custom_message: Optional[str] = Field(None, description="Custom sharing message")
 
+class TrackClickRequest(BaseModel):
+    referral_link_id: str = Field(..., description="Referral link ID")
+    ip_address: str = Field(..., description="Visitor IP address")
+    user_agent: str = Field(..., description="Browser user agent")
+    platform: Optional[SocialPlatform] = Field(None, description="Source platform")
+    utm_source: Optional[str] = Field(None, description="UTM source parameter")
+    utm_medium: Optional[str] = Field(None, description="UTM medium parameter")
+    utm_campaign: Optional[str] = Field(None, description="UTM campaign parameter")
+
+class TrackConversionRequest(BaseModel):
+    referral_link_id: str = Field(..., description="Referral link ID")
+    order_id: str = Field(..., description="Order ID")
+    order_value: float = Field(..., description="Order value")
+    customer_id: Optional[str] = Field(None, description="New customer ID")
+
 class UpdateSocialConfigRequest(BaseModel):
     enabled: Optional[bool] = None
     platforms: Optional[List[SocialPlatform]] = None
