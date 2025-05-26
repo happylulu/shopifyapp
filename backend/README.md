@@ -196,21 +196,27 @@ For detailed migration documentation, see [MIGRATIONS.md](MIGRATIONS.md).
 
 ```
 backend/
-├── main.py                 # Main FastAPI application
-├── models.py              # Core data models
-├── services.py            # Core business logic
-├── mock_data.py           # Mock data generation
-├── vip_models.py          # VIP tier models
-├── vip_service.py         # VIP tier business logic
-├── event_models.py        # VIP event models
-├── event_service.py       # VIP event business logic
-├── ai_models.py           # AI insight models
-├── ai_service.py          # AI insight logic
-├── referral_service.py    # Referral system logic
-├── start_server.py        # Server startup script
-├── kill_port_8000.py      # Port cleanup utility
-├── test_imports.py        # Import testing utility
-└── README.md              # This file
+├── main.py                      # Main FastAPI application
+├── models_v2.py                 # Enhanced database models (v2 schema)
+├── services.py                  # Core business logic
+├── mock_data.py                 # Mock data generation
+├── vip_models.py                # VIP tier models
+├── vip_service.py               # VIP tier business logic
+├── event_models.py              # VIP event models
+├── event_service.py             # VIP event business logic
+├── ai_models.py                 # AI insight models
+├── ai_service.py                # AI insight logic
+├── referral_service.py          # Referral system logic
+├── migrate.py                   # Migration management script
+├── migrate_to_v2.py             # Data migration utility
+├── init_db_with_migrations.py   # Database initialization
+├── start_server.py              # Server startup script
+├── kill_port_8000.py            # Port cleanup utility
+├── alembic/                     # Database migration system
+├── MIGRATIONS.md                # Migration documentation
+├── SCHEMA_V2_GUIDE.md           # v2 schema documentation
+├── IMPLEMENTATION_SUMMARY.md    # Implementation summary
+└── README.md                    # This file
 ```
 
 ## 🔧 Configuration

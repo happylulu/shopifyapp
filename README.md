@@ -105,10 +105,8 @@ development:
   outside of the App’s iFrame.
 - [Apollo](https://www.apollographql.com/) for interacting with the Shopify
   GraphQL API (Optional).
-- [Prisma](https://www.prisma.io/) for managing database connections and
-  migrations. This is optional, but gives you a nice ORM to work with. The
-  template is database agnostic, so you can use any database you want.
-
+- [SQLAlchemy]( ) for managing database connections and
+  migrations. 
 ## Getting started
 
 ### Local Development
@@ -195,8 +193,7 @@ uvicorn backend.main:app --reload
 
 It exposes `/dashboard/overview` which returns loyalty metrics calculated from `backend/mock_data.py`.
 
-<<<<<<< HEAD
-=======
+ 
 
 The Next.js app includes a simple dashboard page at `/dashboard` that fetches these metrics from the FastAPI server. Start both the FastAPI backend and the Next.js dev server to see the data rendered in the app.
->>>>>>> main
+ 

@@ -24,7 +24,7 @@ from pathlib import Path
 backend_dir = Path(__file__).parent
 sys.path.insert(0, str(backend_dir))
 
-from database import engine, Base
+from models_v2 import engine, Base
 
 
 def run_alembic_command(command: list[str]) -> int:
@@ -49,19 +49,19 @@ async def reset_database():
     """Reset the database by dropping and recreating all tables."""
     print("⚠️  WARNING: This will drop all tables and data!")
     confirm = input("Are you sure you want to reset the database? (yes/no): ")
-    
+
     if confirm.lower() != 'yes':
         print("Database reset cancelled.")
         return
-    
+
     print("Dropping all tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     print("Recreating tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     print("✅ Database reset complete!")
 
 
@@ -70,9 +70,9 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
-    
+
     command = sys.argv[1].lower()
-    
+
     if command == "upgrade":
         # Apply migrations
         revision = sys.argv[2] if len(sys.argv) > 2 else "head"
@@ -81,7 +81,7 @@ def main():
         if exit_code == 0:
             print("✅ Database upgrade complete!")
         sys.exit(exit_code)
-    
+
     elif command == "downgrade":
         # Rollback migrations
         revision = sys.argv[2] if len(sys.argv) > 2 else "-1"
@@ -90,35 +90,35 @@ def main():
         if exit_code == 0:
             print("✅ Database downgrade complete!")
         sys.exit(exit_code)
-    
+
     elif command == "current":
         # Show current migration
         print("Current database revision:")
         sys.exit(run_alembic_command(["current"]))
-    
+
     elif command == "history":
         # Show migration history
         print("Migration history:")
         sys.exit(run_alembic_command(["history"]))
-    
+
     elif command == "create":
         # Create new migration
         if len(sys.argv) < 3:
             print("Error: Please provide a migration message")
             print("Usage: python migrate.py create 'Add new table'")
             sys.exit(1)
-        
+
         message = sys.argv[2]
         print(f"Creating new migration: {message}")
         exit_code = run_alembic_command(["revision", "--autogenerate", "-m", message])
         if exit_code == 0:
             print("✅ Migration created successfully!")
         sys.exit(exit_code)
-    
+
     elif command == "reset":
         # Reset database
         asyncio.run(reset_database())
-    
+
     elif command == "check":
         # Check if database is up to date
         print("Checking database status...")
@@ -128,7 +128,7 @@ def main():
         else:
             print("⚠️  Database needs migration!")
         sys.exit(exit_code)
-    
+
     else:
         print(f"Unknown command: {command}")
         print(__doc__)

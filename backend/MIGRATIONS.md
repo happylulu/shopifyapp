@@ -97,7 +97,7 @@ backend/
 │   └── versions/              # Migration files
 │       └── xxx_initial_migration.py
 ├── alembic.ini                # Alembic configuration file
-├── database.py                # Database models and connection
+├── models_v2.py               # Enhanced database models and connection
 ├── migrate.py                 # Migration management script
 ├── init_db_with_migrations.py # Database initialization script
 └── MIGRATIONS.md              # This file
@@ -107,7 +107,7 @@ backend/
 
 ### Automatic Generation (Recommended)
 
-When you modify models in `database.py`, create a migration:
+When you modify models in `models_v2.py`, create a migration:
 
 ```bash
 python migrate.py create "Add email verification to users"
@@ -176,7 +176,7 @@ python migrate.py downgrade -1
 
 ### Adding a New Table
 
-1. Add model to `database.py`:
+1. Add model to `models_v2.py`:
 ```python
 class NewTable(Base):
     __tablename__ = "new_table"
@@ -268,11 +268,11 @@ postgresql+asyncpg://user:pass@host/db?ssl=require
 The migration system uses these environment variables:
 
 - `DATABASE_URL`: PostgreSQL connection string
-- If not set, uses the default Neon connection from `database.py`
+- If not set, uses the default Neon connection from `models_v2.py`
 
 ## Integration with Application
 
-The `init_db()` function in `database.py` has been updated to use migrations automatically. It will:
+The `init_db()` function in `models_v2.py` has been updated to use migrations automatically. It will:
 
 1. Try to use Alembic migrations if available
 2. Fall back to `create_all()` if migrations aren't set up

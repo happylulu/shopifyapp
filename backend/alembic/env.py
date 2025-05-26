@@ -21,8 +21,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from database import Base
-target_metadata = Base.metadata
+
+# Use v2 models for migrations
+from models_v2 import Base as BaseV2
+
+# Use v2 models for new migrations
+target_metadata = BaseV2.metadata
 
 # Get database URL from environment variable
 def get_database_url():

@@ -6,14 +6,16 @@ from datetime import datetime
 import asyncio
 
 # Database helpers for multi-tenancy
-from database import init_db, purge_shop_data
+from models_v2 import init_db
+from models_v2 import Shop, CustomerLoyaltyProfile, get_db
+from sqlalchemy import select, delete
 
 # Import existing models and services
 from mock_data import get_dashboard_data, get_points_program_data
 from services import PointsService
 
 # Import new referral components
-from models import (
+from api_models import (
     CreateReferralLinkRequest, UpdateSocialConfigRequest, UpdateLinkConfigRequest,
     ReferralLinkResponse, AnalyticsResponse, SocialPlatform, ReferralLinkConfig, SocialSharingConfig,
     TrackClickRequest, TrackConversionRequest
@@ -198,7 +200,7 @@ async def create_custom_segment(request: CreateSegmentRequest):
     try:
         # This would integrate with your customer segmentation system
         segment_id = f"segment_{len(request.name.replace(' ', '_').lower())}"
-        
+
         return {
             "success": True,
             "segment_id": segment_id,
@@ -236,17 +238,17 @@ async def get_ai_opportunities(
     try:
         insights = ai_service.generate_customer_insights()
         opportunities = insights.opportunities
-        
+
         # Apply filters
         if type_filter:
             opportunities = [opp for opp in opportunities if opp.type == type_filter]
-        
+
         if impact_threshold > 0:
             opportunities = [opp for opp in opportunities if opp.impact_score >= impact_threshold]
-        
+
         # Sort by impact score
         opportunities.sort(key=lambda x: x.impact_score, reverse=True)
-        
+
         return {
             "success": True,
             "opportunities": opportunities[:limit],
@@ -314,10 +316,10 @@ async def get_vip_members(
     """Get VIP members"""
     shop_domain = get_shop_domain(request)
     members = vip_service.get_members(shop_domain, tier_filter)
-    
+
     # Apply pagination
     paginated_members = members[offset:offset + limit]
-    
+
     return {
         "success": True,
         "members": paginated_members,
@@ -377,6 +379,19 @@ async def get_vip_analytics(request: Request):
 # ---------------------------------------------------------------------------
 # Webhook: app/uninstalled
 # ---------------------------------------------------------------------------
+
+async def purge_shop_data(shop_domain: str) -> None:
+    """Remove all records associated with a shop when the app is uninstalled."""
+    async with get_db() as session:
+        # Find the shop
+        result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+        shop_id = result.scalar_one_or_none()
+        if shop_id is None:
+            return
+
+        # Delete the shop (CASCADE will handle related records)
+        await session.execute(delete(Shop).where(Shop.id == shop_id))
+        await session.commit()
 
 @app.post("/webhooks/app_uninstalled")
 async def app_uninstalled(request: Request):
