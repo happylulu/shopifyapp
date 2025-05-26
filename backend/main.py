@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends, Request, BackgroundTasks
+from jwt_middleware import JWTMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict, Any
 import uvicorn
@@ -41,6 +42,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+app.add_middleware(JWTMiddleware)
 
 # Initialize services
 points_service = PointsService()
