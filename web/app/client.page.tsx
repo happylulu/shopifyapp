@@ -5,6 +5,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { Button, LegacyCard as Card, Page, Text } from "@shopify/polaris";
 import Link from "next/link";
 import { useState } from "react";
+import { useAuthenticatedFetch } from "./hooks/useAuthenticatedFetch";
 import { doServerAction } from "./actions";
 import { useGraphQL } from "./hooks/useGraphQL";
 import AppLayout from "./components/AppLayout";
@@ -29,13 +30,15 @@ export default function Home() {
   }>();
 
   // useGraphQL is a hook that uses Tanstack Query to query Shopify GraphQL, everything is typed!
-  const {
-    data: graphqlData,
-    isLoading: graphqlLoading,
-    error: graphqlError,
+  const { 
+    data: graphqlData, 
+    isLoading: graphqlLoading, 
+    error: graphqlError, 
   } = useGraphQL(GET_SHOP);
 
   const app = useAppBridge();
+  const authFetch = useAuthenticatedFetch();
+  const [testMessage, setTestMessage] = useState<string | null>(null);
 
   const handleGetAPIRequest = async () => {
     try {
@@ -142,6 +145,29 @@ export default function Home() {
           </Button>
         </Card>
 
+        <Card
+          sectioned
+          title="Authenticated Fetch"
+          primaryFooterAction={{
+            content: "Call /api/test",
+            onAction: async () => {
+              const res = await authFetch("/api/test");
+              const json = await res.json();
+              setTestMessage(json.message);
+            },
+          }}
+        >
+          <Text as="p" variant="bodyMd">
+            Demonstrates fetching a session token via App Bridge and calling a
+            protected Next.js API route.
+          </Text>
+          {testMessage && (
+            <Text as="h1" variant="headingSm">
+              {testMessage}
+            </Text>
+          )}
+        </Card>
+
         <Card sectioned title="Shopify App Bridge">
           <Text as="p" variant="bodyMd">
             Use Shopify App Bridge to interact with the Shopify admin. The request
@@ -153,3 +179,4 @@ export default function Home() {
     </AppLayout>
   );
 }
+
