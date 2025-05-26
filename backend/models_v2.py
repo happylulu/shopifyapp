@@ -194,11 +194,36 @@ class CustomerLoyaltyProfile(Base):
 
     # Relationships
     shop = relationship("Shop", back_populates="customers")
-    current_tier = relationship("TierDefinition", foreign_keys=[current_tier_id])
-    point_transactions = relationship("PointTransaction", back_populates="customer", cascade="all, delete-orphan")
-    redemptions = relationship("RedemptionLog", back_populates="customer", cascade="all, delete-orphan")
-    tier_history = relationship("CustomerTierHistory", back_populates="customer", cascade="all, delete-orphan")
-    referral_links = relationship("ReferralLink", back_populates="customer", cascade="all, delete-orphan")
+    current_tier = relationship(
+        "TierDefinition",
+        foreign_keys=[current_tier_id],
+        back_populates="customers",
+    )
+    point_transactions = relationship(
+        "PointTransaction",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    redemptions = relationship(
+        "RedemptionLog",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    tier_history = relationship(
+        "CustomerTierHistory",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    referral_links = relationship(
+        "ReferralLink",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    participations = relationship(
+        "CampaignParticipation",
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
 
     # Constraints
     __table_args__ = (
@@ -210,6 +235,11 @@ class CustomerLoyaltyProfile(Base):
         CheckConstraint('lifetime_points_earned >= 0', name='ck_lifetime_earned_positive'),
         CheckConstraint('lifetime_spent >= 0', name='ck_lifetime_spent_positive'),
     )
+
+    @property
+    def current_tier_name(self) -> Optional[str]:
+        """Convenience access to the name of the customer's current tier."""
+        return self.current_tier.name if self.current_tier else None
 
 
 class PointTransaction(Base):
@@ -299,7 +329,11 @@ class TierDefinition(Base):
 
     # Relationships
     shop = relationship("Shop", back_populates="tiers")
-    customers = relationship("CustomerLoyaltyProfile", foreign_keys="CustomerLoyaltyProfile.current_tier_id")
+    customers = relationship(
+        "CustomerLoyaltyProfile",
+        foreign_keys="CustomerLoyaltyProfile.current_tier_id",
+        back_populates="current_tier",
+    )
     tier_history = relationship("CustomerTierHistory", back_populates="tier")
 
     # Constraints
@@ -525,7 +559,10 @@ class CampaignParticipation(Base):
 
     # Relationships
     campaign = relationship("Campaign", back_populates="participations")
-    customer = relationship("CustomerLoyaltyProfile")
+    customer = relationship(
+        "CustomerLoyaltyProfile",
+        back_populates="participations",
+    )
 
     # Constraints
     __table_args__ = (

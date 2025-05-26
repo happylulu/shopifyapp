@@ -279,3 +279,25 @@ Track segment membership over time.
 - **Flexible Schema**: JSON fields for custom business rules
 - **Performance Optimized**: Proper indexing for fast queries
 - **Migration Safe**: Comprehensive migration tools and validation
+
+## Table Relationships Overview
+
+The diagram below summarizes the primary relationships between the new tables:
+
+- **Shop ↔ CustomerLoyaltyProfile** – one-to-many. Deleting a `Shop` cascades
+  to its customers.
+- **CustomerLoyaltyProfile ↔ PointTransaction** – one-to-many. Points history is
+  tied to each customer.
+- **CustomerLoyaltyProfile ↔ TierDefinition** – many-to-one via
+  `current_tier_id` with back-populated `customers` on the tier model.
+- **CustomerLoyaltyProfile ↔ CampaignParticipation** – one-to-many for tracking
+  campaign engagement.
+- **CustomerLoyaltyProfile ↔ ReferralLink** – one-to-many, allowing multiple
+  referral codes per customer.
+- **RewardDefinition ↔ RedemptionLog** – one-to-many. Reward redemptions are
+  recorded in `RedemptionLog`.
+- **TierDefinition ↔ CustomerTierHistory** – one-to-many to maintain a history
+  of tier changes.
+
+These relationships enable powerful queries while maintaining data integrity
+through cascading deletes and constraints.

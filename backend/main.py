@@ -5,10 +5,17 @@ from typing import List, Optional, Dict, Any
 import uvicorn
 from datetime import datetime
 import asyncio
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Database helpers for multi-tenancy
 from models_v2 import init_db
-from models_v2 import Shop, CustomerLoyaltyProfile, get_db
+from models_v2 import (
+    Shop,
+    CustomerLoyaltyProfile,
+    RewardDefinition,
+    TierDefinition,
+    get_db,
+)
 from sqlalchemy import select, delete
 
 # Import existing models and services
@@ -17,9 +24,23 @@ from services import PointsService
 
 # Import new referral components
 from api_models import (
-    CreateReferralLinkRequest, UpdateSocialConfigRequest, UpdateLinkConfigRequest,
-    ReferralLinkResponse, AnalyticsResponse, SocialPlatform, ReferralLinkConfig, SocialSharingConfig,
-    TrackClickRequest, TrackConversionRequest
+    CreateReferralLinkRequest,
+    UpdateSocialConfigRequest,
+    UpdateLinkConfigRequest,
+    ReferralLinkResponse,
+    AnalyticsResponse,
+    SocialPlatform,
+    ReferralLinkConfig,
+    SocialSharingConfig,
+    TrackClickRequest,
+    TrackConversionRequest,
+    LoyaltyProfileCreate,
+    LoyaltyProfileResponse,
+    AdjustPointsRequest,
+    RewardCreate,
+    RewardResponse,
+    TierCreate,
+    TierResponse,
 )
 from referral_service import ReferralService
 
@@ -33,6 +54,7 @@ from vip_models import (
     VIPMemberResponse, VIPTierResponse, VIPAnalyticsResponse
 )
 from vip_service import VIPService
+from loyalty_service import loyalty_service
 
 app = FastAPI(title="Shopify Loyalty App API", version="1.0.0")
 
@@ -82,6 +104,183 @@ async def get_points_config():
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# Loyalty Program CRUD Endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/loyalty/profiles/", response_model=LoyaltyProfileResponse)
+async def create_loyalty_profile(
+    profile: LoyaltyProfileCreate,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    shop_domain = get_shop_domain(request)
+    result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+    shop_id = result.scalar_one()
+    new_profile = await loyalty_service.create_profile(
+        session,
+        shop_id,
+        profile.shopify_customer_id,
+        email=profile.email,
+        first_name=profile.first_name,
+        last_name=profile.last_name,
+    )
+    return LoyaltyProfileResponse(
+        id=new_profile.id,
+        shopify_customer_id=new_profile.shopify_customer_id,
+        email=new_profile.email,
+        first_name=new_profile.first_name,
+        last_name=new_profile.last_name,
+        points_balance=new_profile.points_balance,
+        current_tier_name=new_profile.current_tier_name,
+    )
+
+
+@app.get("/loyalty/profiles/{shopify_customer_id}/", response_model=LoyaltyProfileResponse)
+async def get_loyalty_profile(
+    shopify_customer_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    shop_domain = get_shop_domain(request)
+    result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+    shop_id = result.scalar_one()
+    profile = await loyalty_service.get_profile(session, shop_id, shopify_customer_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return LoyaltyProfileResponse(
+        id=profile.id,
+        shopify_customer_id=profile.shopify_customer_id,
+        email=profile.email,
+        first_name=profile.first_name,
+        last_name=profile.last_name,
+        points_balance=profile.points_balance,
+        current_tier_name=profile.current_tier_name,
+    )
+
+
+@app.put("/loyalty/profiles/{shopify_customer_id}/points/", response_model=LoyaltyProfileResponse)
+async def adjust_points_endpoint(
+    shopify_customer_id: str,
+    adjustments: AdjustPointsRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    shop_domain = get_shop_domain(request)
+    result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+    shop_id = result.scalar_one()
+    profile = await loyalty_service.get_profile(session, shop_id, shopify_customer_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    try:
+        updated = await loyalty_service.adjust_points(
+            session, profile, adjustments.amount, adjustments.reason or "adjustment"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return LoyaltyProfileResponse(
+        id=updated.id,
+        shopify_customer_id=updated.shopify_customer_id,
+        email=updated.email,
+        first_name=updated.first_name,
+        last_name=updated.last_name,
+        points_balance=updated.points_balance,
+        current_tier_name=updated.current_tier_name,
+    )
+
+
+@app.get("/rewards/", response_model=List[RewardResponse])
+async def list_rewards(session: AsyncSession = Depends(get_db), request: Request = None):
+    shop_domain = get_shop_domain(request) if request else "demo.myshopify.com"
+    result = await session.execute(
+        select(RewardDefinition).join(Shop).where(Shop.shop_domain == shop_domain)
+    )
+    rewards = result.scalars().all()
+    return [
+        RewardResponse(
+            id=r.id,
+            name=r.name,
+            points_cost=r.points_cost,
+            reward_type=r.reward_type,
+            description=r.description,
+        )
+        for r in rewards
+    ]
+
+
+@app.post("/rewards/", response_model=RewardResponse)
+async def create_reward(
+    reward: RewardCreate,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    shop_domain = get_shop_domain(request)
+    result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+    shop_id = result.scalar_one()
+    new_reward = RewardDefinition(
+        shop_id=shop_id,
+        name=reward.name,
+        description=reward.description,
+        reward_type=reward.reward_type,
+        points_cost=reward.points_cost,
+    )
+    session.add(new_reward)
+    await session.commit()
+    await session.refresh(new_reward)
+    return RewardResponse(
+        id=new_reward.id,
+        name=new_reward.name,
+        points_cost=new_reward.points_cost,
+        reward_type=new_reward.reward_type,
+        description=new_reward.description,
+    )
+
+
+@app.get("/tiers/", response_model=List[TierResponse])
+async def list_tiers(session: AsyncSession = Depends(get_db), request: Request = None):
+    shop_domain = get_shop_domain(request) if request else "demo.myshopify.com"
+    result = await session.execute(
+        select(TierDefinition).join(Shop).where(Shop.shop_domain == shop_domain)
+    )
+    tiers = result.scalars().all()
+    return [
+        TierResponse(
+            id=t.id,
+            name=t.name,
+            tier_level=t.tier_level,
+            min_points_required=t.min_points_required,
+        )
+        for t in tiers
+    ]
+
+
+@app.post("/tiers/", response_model=TierResponse)
+async def create_tier(
+    tier: TierCreate,
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    shop_domain = get_shop_domain(request)
+    result = await session.execute(select(Shop.id).where(Shop.shop_domain == shop_domain))
+    shop_id = result.scalar_one()
+    new_tier = TierDefinition(
+        shop_id=shop_id,
+        name=tier.name,
+        tier_level=tier.tier_level,
+        min_points_required=tier.min_points_required,
+        description=tier.description,
+    )
+    session.add(new_tier)
+    await session.commit()
+    await session.refresh(new_tier)
+    return TierResponse(
+        id=new_tier.id,
+        name=new_tier.name,
+        tier_level=new_tier.tier_level,
+        min_points_required=new_tier.min_points_required,
+    )
 
 # ============================================================================
 # REFERRAL SYSTEM API ENDPOINTS

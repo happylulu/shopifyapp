@@ -126,3 +126,56 @@ class AnalyticsResponse(BaseModel):
     success: bool
     analytics: Optional[ReferralAnalytics] = None
     error: Optional[str] = None
+
+
+# ---------------- Loyalty Program Models ----------------
+
+class LoyaltyProfileCreate(BaseModel):
+    shopify_customer_id: str
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+
+
+class LoyaltyProfileResponse(BaseModel):
+    id: int
+    shopify_customer_id: str
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    points_balance: int
+    current_tier_name: Optional[str] = None
+
+
+class AdjustPointsRequest(BaseModel):
+    amount: int
+    reason: Optional[str] = None
+
+
+class RewardCreate(BaseModel):
+    name: str
+    points_cost: int
+    reward_type: str
+    description: Optional[str] = None
+
+
+class RewardResponse(BaseModel):
+    id: int
+    name: str
+    points_cost: int
+    reward_type: str
+    description: Optional[str] = None
+
+
+class TierCreate(BaseModel):
+    name: str
+    tier_level: int
+    min_points_required: int = 0
+    description: Optional[str] = None
+
+
+class TierResponse(BaseModel):
+    id: int
+    name: str
+    tier_level: int
+    min_points_required: int
