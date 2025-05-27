@@ -819,12 +819,8 @@ class CustomerSegmentMembership(Base):
 
 
 # Database utility functions
-from contextlib import asynccontextmanager
-
-
-@asynccontextmanager
-async def get_db() -> AsyncSession:
-    """Get database session"""
+async def get_db():
+    """Get database session for FastAPI dependency injection"""
     session: AsyncSession = async_session()
     try:
         yield session

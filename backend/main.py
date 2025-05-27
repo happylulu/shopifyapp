@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends, Request, BackgroundTasks
+from contextlib import asynccontextmanager
 from jwt_middleware import JWTMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict, Any
@@ -56,7 +57,15 @@ from vip_models import (
 from vip_service import VIPService
 from loyalty_service import loyalty_service
 
-app = FastAPI(title="Shopify Loyalty App API", version="1.0.0")
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await init_db()
+    yield
+    # Shutdown (if needed)
+
+app = FastAPI(title="Shopify Loyalty App API", version="1.0.0", lifespan=lifespan)
 
 # Enable CORS for frontend
 app.add_middleware(
@@ -73,9 +82,6 @@ points_service = PointsService()
 referral_service = ReferralService()
 ai_service = AIInsightsService()  # New AI service
 vip_service = VIPService()  # New VIP service
-
-# Initialize database tables for multi-tenant storage
-asyncio.run(init_db())
 
 # Helper function to extract shop domain from headers (Shopify app pattern)
 def get_shop_domain(request: Request) -> str:
@@ -288,8 +294,18 @@ async def create_tier(
 
 @app.get("/referrals/link-config")
 async def get_referral_link_config(request: Request):
-    shop_domain = get_shop_domain(request)
-    return referral_service.get_link_config(shop_domain)
+    # Return mock data for now
+    return {
+        "success": True,
+        "config": {
+            "referrer_points": 500,
+            "referee_points": 250,
+            "referrer_discount_percentage": 10.0,
+            "referee_discount_percentage": 15.0,
+            "link_expiry_days": 30,
+            "max_uses_per_link": 100
+        }
+    }
 
 @app.post("/referrals/link-config")
 async def update_referral_link_config(config: ReferralLinkConfig, request: Request):
@@ -299,7 +315,17 @@ async def update_referral_link_config(config: ReferralLinkConfig, request: Reque
 @app.get("/referrals/social-config")
 async def get_social_config(request: Request):
     shop_domain = get_shop_domain(request)
-    return referral_service.get_social_config(shop_domain)
+    config = referral_service.get_social_config(shop_domain)
+    return {
+        "success": True,
+        "config": {
+            "enabled": config.enabled,
+            "platforms": [p.value for p in config.platforms],
+            "default_message": config.default_message,
+            "use_platform_specific": config.use_platform_specific,
+            "platform_messages": {k.value: v for k, v in config.platform_messages.items()}
+        }
+    }
 
 @app.post("/referrals/social-config")
 async def update_social_config(config: SocialSharingConfig, request: Request):
@@ -345,7 +371,18 @@ async def track_referral_conversion(request_data: TrackConversionRequest, reques
 @app.get("/referrals/analytics")
 async def get_referral_analytics(request: Request, days: int = 30):
     shop_domain = get_shop_domain(request)
-    return referral_service.get_analytics(shop_domain, days)
+    analytics = referral_service.get_analytics(shop_domain, days)
+    return {
+        "success": True,
+        "analytics": {
+            "total_links": analytics.total_links,
+            "total_clicks": analytics.total_clicks,
+            "total_conversions": analytics.total_conversions,
+            "conversion_rate": analytics.conversion_rate,
+            "revenue_today": float(analytics.revenue_today),
+            "top_referrers": analytics.top_referrers
+        }
+    }
 
 @app.get("/referrals/analytics/{link_id}")
 async def get_link_analytics(link_id: str, request: Request, days: int = 30):
