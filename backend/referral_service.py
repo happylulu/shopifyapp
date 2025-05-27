@@ -294,3 +294,89 @@ class ReferralService:
             self.referral_links[link_id].is_active = False
             return True
         return False
+
+    # ------------------------------------------------------------------
+    # Additional helper methods used by API endpoints
+    # ------------------------------------------------------------------
+
+    def get_referral_links(
+        self,
+        shop_domain: str,
+        customer_id: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[ReferralLink]:
+        """Retrieve referral links with optional filtering."""
+        links = [l for l in self.referral_links.values() if l.shop_domain == shop_domain]
+        if customer_id:
+            links = [l for l in links if l.customer_id == customer_id]
+        if status == "active":
+            links = [l for l in links if l.is_active]
+        elif status == "inactive":
+            links = [l for l in links if not l.is_active]
+        return links[offset : offset + limit]
+
+    def get_referral_link(self, shop_domain: str, link_id: str) -> Optional[ReferralLink]:
+        """Get a single referral link by ID."""
+        link = self.referral_links.get(link_id)
+        if link and link.shop_domain == shop_domain:
+            return link
+        return None
+
+    def delete_referral_link(self, shop_domain: str, link_id: str) -> bool:
+        """Delete (deactivate) a referral link."""
+        link = self.referral_links.get(link_id)
+        if link and link.shop_domain == shop_domain:
+            link.is_active = False
+            return True
+        return False
+
+    def track_click(self, shop_domain: str, req: TrackClickRequest) -> Optional[ReferralClick]:
+        """Wrapper for tracking a referral click from API request."""
+        return self.track_referral_click(
+            req.referral_code,
+            req.ip_address,
+            req.user_agent,
+            req.utm_source,
+            req.utm_medium,
+            req.utm_campaign,
+        )
+
+    def track_conversion(self, shop_domain: str, req: TrackConversionRequest) -> bool:
+        """Wrapper for marking a referral conversion from API request."""
+        return self.mark_conversion(req.referral_code, req.order_id, req.order_value)
+
+    def get_link_analytics(self, shop_domain: str, link_id: str, days: int = 30) -> Optional[ReferralAnalytics]:
+        """Return analytics for a single referral link."""
+        link = self.get_referral_link(shop_domain, link_id)
+        if not link:
+            return None
+
+        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        clicks = [
+            c for c in self.referral_clicks
+            if c.referral_link_id == link_id and c.timestamp >= cutoff_date
+        ]
+
+        total_clicks = len(clicks)
+        total_conversions = len([c for c in clicks if c.converted])
+        conversion_rate = (total_conversions / total_clicks * 100) if total_clicks else 0
+
+        return ReferralAnalytics(
+            shop_domain=shop_domain,
+            date=datetime.utcnow(),
+            total_links=1,
+            total_clicks=total_clicks,
+            total_conversions=total_conversions,
+            conversion_rate=round(conversion_rate, 2),
+            revenue_today=link.revenue_generated,
+            top_referrers=[
+                {
+                    "name": link.customer_name,
+                    "clicks": link.clicks,
+                    "conversions": link.conversions,
+                    "revenue": link.revenue_generated,
+                }
+            ],
+        )

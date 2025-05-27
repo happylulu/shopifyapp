@@ -111,7 +111,7 @@ class ReferralApiService {
    * Create a new referral link
    */
   async createReferralLink(request: CreateReferralLinkRequest): Promise<ReferralLink> {
-    const response = await this.fetchApi<ReferralLinkResponse>('/referrals/create-link', {
+    const response = await this.fetchApi<ReferralLinkResponse>('/referrals/links', {
       method: 'POST',
       body: JSON.stringify(request),
     });
@@ -127,7 +127,7 @@ class ReferralApiService {
    * Get referral links for a specific customer
    */
   async getCustomerReferralLinks(customerId: string): Promise<ReferralLink[]> {
-    const response = await this.fetchApi<ApiResponse<ReferralLink[]>>(`/referrals/customer/${customerId}`);
+    const response = await this.fetchApi<ApiResponse<ReferralLink[]>>(`/referrals/links?customer_id=${customerId}`);
     
     if (!response.success) {
       throw new Error(response.error || 'Failed to fetch referral links');
@@ -155,7 +155,7 @@ class ReferralApiService {
    * Deactivate a referral link
    */
   async deactivateReferralLink(linkId: string): Promise<void> {
-    const response = await this.fetchApi<ApiResponse>(`/referrals/link/${linkId}`, {
+    const response = await this.fetchApi<ApiResponse>(`/referrals/links/${linkId}`, {
       method: 'DELETE',
     });
 
@@ -185,8 +185,11 @@ class ReferralApiService {
     });
 
     const response = await this.fetchApi<ApiResponse<{ click_id: string }>>(
-      `/referrals/track-click?${params}`,
-      { method: 'POST' }
+      '/referrals/clicks',
+      {
+        method: 'POST',
+        body: JSON.stringify(Object.fromEntries(params)),
+      }
     );
 
     if (!response.success || !response.data) {
@@ -204,7 +207,7 @@ class ReferralApiService {
     orderId: string,
     orderValue: number
   ): Promise<void> {
-    const response = await this.fetchApi<ApiResponse>('/referrals/mark-conversion', {
+    const response = await this.fetchApi<ApiResponse>('/referrals/conversions', {
       method: 'POST',
       body: JSON.stringify({
         referral_code: referralCode,

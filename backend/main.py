@@ -294,43 +294,38 @@ async def create_tier(
 
 @app.get("/referrals/link-config")
 async def get_referral_link_config(request: Request):
-    # Return mock data for now
-    return {
-        "success": True,
-        "config": {
-            "referrer_points": 500,
-            "referee_points": 250,
-            "referrer_discount_percentage": 10.0,
-            "referee_discount_percentage": 15.0,
-            "link_expiry_days": 30,
-            "max_uses_per_link": 100
-        }
-    }
-
-@app.post("/referrals/link-config")
-async def update_referral_link_config(config: ReferralLinkConfig, request: Request):
+    """Return the referral link configuration for the current shop."""
     shop_domain = get_shop_domain(request)
-    return referral_service.update_link_config(shop_domain, config)
+    config = referral_service.get_link_config(shop_domain)
+    return {"success": True, "config": config.model_dump()}
+
+@app.put("/referrals/link-config")
+async def update_referral_link_config(update: UpdateLinkConfigRequest, request: Request):
+    """Update and return the referral link configuration."""
+    shop_domain = get_shop_domain(request)
+    config = referral_service.update_link_config(shop_domain, update)
+    return {"success": True, "config": config.model_dump()}
 
 @app.get("/referrals/social-config")
 async def get_social_config(request: Request):
+    """Return social sharing configuration for the current shop."""
     shop_domain = get_shop_domain(request)
     config = referral_service.get_social_config(shop_domain)
-    return {
-        "success": True,
-        "config": {
-            "enabled": config.enabled,
-            "platforms": [p.value for p in config.platforms],
-            "default_message": config.default_message,
-            "use_platform_specific": config.use_platform_specific,
-            "platform_messages": {k.value: v for k, v in config.platform_messages.items()}
-        }
-    }
+    # Convert enum keys to their value for JSON serialisation
+    cfg = config.model_dump()
+    cfg["platforms"] = [p.value for p in config.platforms]
+    cfg["platform_messages"] = {k.value: v for k, v in config.platform_messages.items()}
+    return {"success": True, "config": cfg}
 
-@app.post("/referrals/social-config")
-async def update_social_config(config: SocialSharingConfig, request: Request):
+@app.put("/referrals/social-config")
+async def update_social_config(update: UpdateSocialConfigRequest, request: Request):
+    """Update and return the social sharing configuration."""
     shop_domain = get_shop_domain(request)
-    return referral_service.update_social_config(shop_domain, config)
+    config = referral_service.update_social_config(shop_domain, update)
+    cfg = config.model_dump()
+    cfg["platforms"] = [p.value for p in config.platforms]
+    cfg["platform_messages"] = {k.value: v for k, v in config.platform_messages.items()}
+    return {"success": True, "config": cfg}
 
 @app.post("/referrals/links")
 async def create_referral_link(request_data: CreateReferralLinkRequest, request: Request):
@@ -351,22 +346,34 @@ async def get_referral_links(
 @app.get("/referrals/links/{link_id}")
 async def get_referral_link(link_id: str, request: Request):
     shop_domain = get_shop_domain(request)
-    return referral_service.get_referral_link(shop_domain, link_id)
+    link = referral_service.get_referral_link(shop_domain, link_id)
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    return link
 
 @app.delete("/referrals/links/{link_id}")
 async def delete_referral_link(link_id: str, request: Request):
     shop_domain = get_shop_domain(request)
-    return referral_service.delete_referral_link(shop_domain, link_id)
+    success = referral_service.delete_referral_link(shop_domain, link_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Link not found")
+    return {"success": True}
 
 @app.post("/referrals/clicks")
 async def track_referral_click(request_data: TrackClickRequest, request: Request):
     shop_domain = get_shop_domain(request)
-    return referral_service.track_click(shop_domain, request_data)
+    click = referral_service.track_click(shop_domain, request_data)
+    if not click:
+        raise HTTPException(status_code=404, detail="Invalid referral code")
+    return {"success": True, "click_id": click.id}
 
 @app.post("/referrals/conversions")
 async def track_referral_conversion(request_data: TrackConversionRequest, request: Request):
     shop_domain = get_shop_domain(request)
-    return referral_service.track_conversion(shop_domain, request_data)
+    success = referral_service.track_conversion(shop_domain, request_data)
+    if not success:
+        raise HTTPException(status_code=404, detail="Invalid referral code")
+    return {"success": True}
 
 @app.get("/referrals/analytics")
 async def get_referral_analytics(request: Request, days: int = 30):
@@ -387,7 +394,10 @@ async def get_referral_analytics(request: Request, days: int = 30):
 @app.get("/referrals/analytics/{link_id}")
 async def get_link_analytics(link_id: str, request: Request, days: int = 30):
     shop_domain = get_shop_domain(request)
-    return referral_service.get_link_analytics(shop_domain, link_id, days)
+    analytics = referral_service.get_link_analytics(shop_domain, link_id, days)
+    if not analytics:
+        raise HTTPException(status_code=404, detail="Link not found")
+    return {"success": True, "analytics": analytics.model_dump()}
 
 # =================== NEW AI INSIGHTS ENDPOINTS ===================
 
