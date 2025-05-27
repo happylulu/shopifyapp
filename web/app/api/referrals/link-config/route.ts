@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8002";
+const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8004";
 
 /**
  * GET /api/referrals/link-config
@@ -9,7 +9,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8002";
 export async function GET(request: NextRequest) {
   try {
     console.log(`Proxying to: ${BACKEND_URL}/referrals/link-config`);
-    
+
     const response = await fetch(`${BACKEND_URL}/referrals/link-config`, {
       method: 'GET',
       headers: {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error proxying to backend:", error);
     return NextResponse.json(
-      { 
+      {
         error: "Failed to connect to backend",
         details: error instanceof Error ? error.message : "Unknown error"
       },
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const response = await fetch(`${BACKEND_URL}/referrals/link-config`, {
       method: 'POST',
       headers: {

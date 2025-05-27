@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8002";
+const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8004";
 
 /**
  * GET /api/referrals/social-config
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Error fetching social config:", error);
-    
+
     // Return mock data on error
     return NextResponse.json({
       success: true,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const response = await fetch(`${BACKEND_URL}/referrals/social-config`, {
       method: 'POST',
       headers: {

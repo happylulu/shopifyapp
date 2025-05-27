@@ -8,7 +8,7 @@ import re
 from api_models import (
     ReferralLinkConfig, SocialSharingConfig, ReferralLink, ReferralClick,
     SocialPlatform, CreateReferralLinkRequest, UpdateSocialConfigRequest,
-    UpdateLinkConfigRequest, ReferralAnalytics
+    UpdateLinkConfigRequest, ReferralAnalytics, TrackClickRequest, TrackConversionRequest
 )
 
 class ReferralService:

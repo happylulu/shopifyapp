@@ -49,11 +49,45 @@ export default function ReferralsPage() {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const [linkConfig, socialConfig, analytics] = await Promise.all([
-        referralApi.getLinkConfig(),
-        referralApi.getSocialConfig(),
-        referralApi.getAnalytics(30),
-      ]);
+      // Load each endpoint separately to handle partial failures
+      let linkConfig = null;
+      let socialConfig = null;
+      let analytics = null;
+
+      try {
+        linkConfig = await referralApi.getLinkConfig();
+      } catch (error) {
+        console.warn('Failed to load link config:', error);
+      }
+
+      try {
+        socialConfig = await referralApi.getSocialConfig();
+      } catch (error) {
+        console.warn('Failed to load social config:', error);
+        // Provide default social config
+        socialConfig = {
+          enabled: true,
+          platforms: ['facebook', 'twitter'],
+          default_message: 'Check out this amazing store!',
+          use_platform_specific: true,
+          platform_messages: {}
+        };
+      }
+
+      try {
+        analytics = await referralApi.getAnalytics(30);
+      } catch (error) {
+        console.warn('Failed to load analytics:', error);
+        // Provide default analytics
+        analytics = {
+          total_links: 0,
+          total_clicks: 0,
+          total_conversions: 0,
+          conversion_rate: 0,
+          revenue_today: 0,
+          top_referrers: []
+        };
+      }
 
       setState(prev => ({
         ...prev,
@@ -104,7 +138,7 @@ export default function ReferralsPage() {
       content: 'Link Configuration',
     },
     {
-      id: 'social-config', 
+      id: 'social-config',
       content: 'Social Sharing',
     },
     {
@@ -225,7 +259,7 @@ export default function ReferralsPage() {
                   loading={state.loading}
                 />
               )}
-              
+
               {selectedTab === 'social-config' && (
                 <SocialSharingTab
                   config={state.socialConfig}
@@ -233,7 +267,7 @@ export default function ReferralsPage() {
                   loading={state.loading}
                 />
               )}
-              
+
               {selectedTab === 'analytics' && (
                 <AnalyticsTab
                   analytics={state.analytics}
@@ -241,7 +275,7 @@ export default function ReferralsPage() {
                   loading={state.loading}
                 />
               )}
-              
+
               {selectedTab === 'links' && (
                 <ReferralLinksTab
                   links={state.referralLinks}
@@ -279,38 +313,38 @@ export default function ReferralsPage() {
           background: linear-gradient(135deg, #f0fdf4 0%, #fef3e7 100%);
           min-height: 100vh;
         }
-        
+
         .referrals-page :global(.Polaris-Card) {
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           border: 1px solid rgba(34, 197, 94, 0.1);
         }
-        
+
         .referrals-page :global(.Polaris-Badge--toneSuccess) {
           background: linear-gradient(135deg, #22c55e, #16a34a);
           color: white;
         }
-        
+
         .referrals-page :global(.Polaris-Button--variantPrimary) {
           background: linear-gradient(135deg, #22c55e, #16a34a);
           border: none;
           box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
-        
+
         .referrals-page :global(.Polaris-Button--variantSecondary) {
           background: linear-gradient(135deg, #fb923c, #f97316);
           color: white;
           border: none;
           box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
         }
-        
+
         .referrals-page :global(.Polaris-Tabs__Tab--selected) {
           border-bottom-color: #22c55e;
         }
-        
+
         .referrals-page :global(.Polaris-Text--toneSuccess) {
           color: #16a34a;
         }
       `}</style>
     </div>
   );
-} 
+}

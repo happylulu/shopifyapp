@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8002";
+const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8004";
 
 /**
  * GET /api/referrals/analytics
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const days = searchParams.get('days') || '30';
-    
+
     const response = await fetch(`${BACKEND_URL}/referrals/analytics?days=${days}`, {
       method: 'GET',
       headers: {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Error fetching referral analytics:", error);
-    
+
     // Return mock data on error
     return NextResponse.json({
       success: true,
