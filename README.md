@@ -183,6 +183,15 @@ how to set up Prisma, see the
 - [Shopify CLI](https://shopify.dev/apps/tools/cli)
 - [Shopify API Library documentation](https://github.com/Shopify/shopify-api-node/tree/main/docs)
 
+## Identity Management
+
+This template demonstrates handling both merchant staff and customer identities.
+
+- **Merchant (Admin) context** uses the session token and the App Bridge User API.
+  Use the `useAppBridgeUser` hook to retrieve staff details in React components.
+- **Customer (Storefront) context** relies on the checkout `buyerIdentity` object.
+  The sample discount function in `extensions/discount-function` shows how to read this information.
+
 ## FastAPI Mock Backend
 
 A small FastAPI service with mock data is located in the `backend` directory. Run it locally with:
