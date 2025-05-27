@@ -1,0 +1,13 @@
+{
+  "id": "1",
+  "shopify_customer_id": "customer123",
+  "email": "john@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "points_balance": 1250,
+  "current_tier_name": "Silver",
+  "total_points_earned": 2500,
+  "total_points_redeemed": 1250,
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-15T12:30:00Z"
+}

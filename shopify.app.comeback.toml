@@ -3,7 +3,7 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://simple-modified-chapel-system.trycloudflare.com"
+application_url = "https://minolta-wanted-extraction-simply.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "read_products,read_orders,write_orders,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://simple-modified-chapel-system.trycloudflare.com/auth/callback",
-  "https://simple-modified-chapel-system.trycloudflare.com/auth/shopify/callback",
-  "https://simple-modified-chapel-system.trycloudflare.com/api/auth/callback"
+  "https://minolta-wanted-extraction-simply.trycloudflare.com/auth/callback",
+  "https://minolta-wanted-extraction-simply.trycloudflare.com/auth/shopify/callback",
+  "https://minolta-wanted-extraction-simply.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

@@ -1,0 +1,297 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Loyalty API Contract",
+  "description": "Schema definitions for loyalty program API requests and responses",
+  "definitions": {
+    "CustomerProfile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Internal profile ID"
+        },
+        "shopify_customer_id": {
+          "type": "string",
+          "description": "Shopify customer ID"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "points_balance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "current_tier_name": {
+          "type": "string"
+        },
+        "total_points_earned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_points_redeemed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "shopify_customer_id", "email", "points_balance"],
+      "additionalProperties": false
+    },
+    "Reward": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "points_cost": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reward_type": {
+          "type": "string",
+          "enum": ["discount", "free_shipping", "product", "experience"]
+        },
+        "is_active": {
+          "type": "boolean"
+        },
+        "usage_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "usage_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "points_cost", "reward_type", "is_active"],
+      "additionalProperties": false
+    },
+    "Tier": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "tier_level": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_points_required": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "benefits": {
+          "type": "object"
+        }
+      },
+      "required": ["id", "name", "tier_level", "min_points_required"],
+      "additionalProperties": false
+    },
+    "AdjustPointsRequest": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "description": "Points to add (positive) or deduct (negative)"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Reason for the adjustment"
+        }
+      },
+      "required": ["amount", "reason"],
+      "additionalProperties": false
+    },
+    "CreateRewardRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "points_cost": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reward_type": {
+          "type": "string",
+          "enum": ["discount", "free_shipping", "product", "experience"]
+        },
+        "usage_limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["name", "points_cost", "reward_type"],
+      "additionalProperties": false
+    },
+    "CreateTierRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "tier_level": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_points_required": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": ["name", "tier_level", "min_points_required"],
+      "additionalProperties": false
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "required": ["error"],
+      "additionalProperties": false
+    }
+  },
+  "paths": {
+    "/api/loyalty/profiles/{customerId}": {
+      "get": {
+        "description": "Get customer loyalty profile",
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/CustomerProfile"
+          },
+          "404": {
+            "$ref": "#/definitions/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/loyalty/profiles/{customerId}/points": {
+      "put": {
+        "description": "Adjust customer points",
+        "requestBody": {
+          "$ref": "#/definitions/AdjustPointsRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/CustomerProfile"
+          },
+          "400": {
+            "$ref": "#/definitions/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/rewards": {
+      "get": {
+        "description": "List all rewards",
+        "responses": {
+          "200": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Reward"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new reward",
+        "requestBody": {
+          "$ref": "#/definitions/CreateRewardRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/Reward"
+          },
+          "400": {
+            "$ref": "#/definitions/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/tiers": {
+      "get": {
+        "description": "List all tiers",
+        "responses": {
+          "200": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Tier"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new tier",
+        "requestBody": {
+          "$ref": "#/definitions/CreateTierRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/Tier"
+          },
+          "400": {
+            "$ref": "#/definitions/ErrorResponse"
+          }
+        }
+      }
+    }
+  }
+}

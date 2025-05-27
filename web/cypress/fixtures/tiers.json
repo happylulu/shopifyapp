@@ -1,0 +1,30 @@
+[
+  {
+    "id": "tier1",
+    "name": "Bronze",
+    "tier_level": 1,
+    "min_points_required": 0,
+    "description": "Entry level tier with basic benefits"
+  },
+  {
+    "id": "tier2",
+    "name": "Silver",
+    "tier_level": 2,
+    "min_points_required": 1000,
+    "description": "Mid-tier with enhanced benefits and exclusive offers"
+  },
+  {
+    "id": "tier3",
+    "name": "Gold",
+    "tier_level": 3,
+    "min_points_required": 1500,
+    "description": "Premium tier with VIP treatment and priority support"
+  },
+  {
+    "id": "tier4",
+    "name": "Platinum",
+    "tier_level": 4,
+    "min_points_required": 3000,
+    "description": "Ultimate tier with exclusive access and personalized service"
+  }
+]

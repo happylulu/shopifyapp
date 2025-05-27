@@ -1,35 +1,156 @@
-# Shopify App Template - Next.js App Router
+# Shopify Loyalty & Rewards App
 
-This is a template for building a
-[Shopify app](https://shopify.dev/apps/getting-started) using Next.js and
-Typescript. It contains the basics for building a Shopify app on Next.js using
-the app router and server components.
+A comprehensive loyalty and rewards program for Shopify stores, built with Next.js, FastAPI, and modern web technologies. This app provides merchants with powerful tools to increase customer retention through points, tiers, referrals, VIP programs, and AI-driven insights.
 
-## Features
+## 🎯 **Core Features**
 
-- **Next.js**: Using the latest app router and server components.
-- **Prisma (Optional)**: For managing database connections and migrations.
-- **Tanstack Query**: For interacting with the Shopify GraphQL API.
-- **App Bridge v4**: For authenticating API requests in the frontend.
-- **Shopify API library**: For managing OAuth on the serverless backend.
-- **Polaris React**: For building high quality, consistent experiences for
-  Shopify merchants.
-- **Tailwind CSS**: For fast, flexible styling and design.
-- **Docker (Optional)**: For setting up the postgres database for local
-  development.
-- **Graphql-Codegen**: For generating types for graphql queries and mutations.
+### 💎 **Loyalty Program**
+- **Points System**: Customers earn points for purchases, reviews, referrals
+- **Tier Management**: Bronze, Silver, Gold, Platinum tiers with escalating benefits
+- **Reward Redemption**: Discount codes, free products, exclusive perks
+- **Point Expiration**: Configurable point expiry to encourage engagement
 
-### Installing the template
+### 🔗 **Referral System**
+- **Custom Referral Links**: Unique URLs for each customer
+- **Social Sharing**: Facebook, Twitter, Instagram, Email integration
+- **UTM Tracking**: Detailed analytics on referral performance
+- **Conversion Tracking**: Monitor clicks to purchases
 
-This template can be installed using your preferred package manager:
+### 👑 **VIP Tiers & Events**
+- **VIP Member Management**: Exclusive tier for high-value customers
+- **Special Events**: Limited-time campaigns and promotions
+- **Personalized Benefits**: Custom rewards based on customer behavior
+- **Event Analytics**: Track engagement and ROI
 
-Using pnpm (recommended):
+### 🤖 **AI-Powered Insights**
+- **Customer Segmentation**: Automatic grouping based on behavior
+- **Predictive Analytics**: Identify at-risk and high-value customers
+- **Personalized Recommendations**: AI-suggested rewards and campaigns
+- **Performance Optimization**: Data-driven insights for program improvement
 
-```shell
-pnpx @shopify/create-app@latest --template https://github.com/ozzyonfire/shopify-next-app.git
+## 🏗️ **Technical Architecture**
+
+### **Frontend (Next.js 14)**
+- **App Router**: Modern Next.js with server components
+- **TypeScript**: Full type safety across the application
+- **Shopify Polaris**: Native Shopify design system
+- **App Bridge v4**: Seamless Shopify admin integration
+- **API Routes**: Next.js API proxy for backend communication
+
+### **Backend (FastAPI + Python)**
+- **FastAPI**: High-performance async API framework
+- **SQLAlchemy**: Advanced ORM with async support
+- **PostgreSQL**: Robust relational database
+- **Alembic**: Database migration management
+- **Pydantic**: Data validation and serialization
+
+### **Database Schema**
+- **Customer Loyalty Profiles**: Points, tiers, preferences
+- **Reward Definitions**: Configurable reward catalog
+- **Referral Links**: Tracking and analytics
+- **VIP Events**: Campaign management
+- **Analytics Tables**: Pre-computed metrics
+
+### **Shopify Integration**
+- **Discount Functions**: Native Shopify discount engine
+- **Webhooks**: Real-time order and customer updates
+- **GraphQL API**: Product and customer data sync
+- **App Bridge**: Embedded app experience
+
+## 🛠️ **Tech Stack**
+
+- **Next.js 14**: React framework with app router
+- **FastAPI**: Python async web framework
+- **SQLAlchemy**: Database ORM with async support
+- **PostgreSQL**: Primary database
+- **TypeScript**: Type safety across frontend and API
+- **Shopify Polaris**: UI component library
+- **App Bridge v4**: Shopify app integration
+- **Alembic**: Database migrations
+
+## 🚀 **Quick Start**
+
+### **1. Clone and Install**
+```bash
+git clone <your-repo-url>
+cd shopify-loyalty-app
+npm install
 ```
 
-This will clone the template and install the required dependencies.
+### **2. Environment Setup**
+Create `web/.env.local`:
+```bash
+# Shopify App Configuration
+SHOPIFY_API_KEY=your_api_key_here
+SHOPIFY_API_SECRET=your_api_secret_here
+SCOPES=read_products,write_products,read_customers,write_customers,read_orders,write_orders,read_discounts,write_discounts
+
+# Backend Configuration
+BACKEND_URL=http://127.0.0.1:8004
+
+# Session Storage
+SESSION_SECRET=your-session-secret-key
+```
+
+### **3. Database Setup**
+```bash
+# Start PostgreSQL (Docker)
+docker-compose up -d postgres
+
+# Run migrations
+cd backend
+alembic upgrade head
+```
+
+### **4. Start Development Servers**
+```bash
+# Terminal 1: Backend API
+cd backend
+python -m uvicorn main:app --host 127.0.0.1 --port 8004 --reload
+
+# Terminal 2: Frontend
+cd web
+npm run dev
+
+# Terminal 3: Shopify CLI
+shopify app dev
+```
+
+### **5. Access the App**
+- **Shopify Admin**: Follow the CLI preview URL
+- **API Docs**: http://127.0.0.1:8004/docs
+- **Frontend**: http://localhost:3000
+
+## 📡 **API Endpoints**
+
+### **Loyalty Program**
+- `GET /loyalty/profiles/{customer_id}/` - Get customer loyalty profile
+- `POST /loyalty/profiles/` - Create new loyalty profile
+- `PUT /loyalty/profiles/{customer_id}/points/` - Adjust customer points
+
+### **Rewards & Tiers**
+- `GET /rewards/` - List all rewards
+- `POST /rewards/` - Create new reward
+- `GET /tiers/` - List all tiers
+- `POST /tiers/` - Create new tier
+
+### **Referral System**
+- `GET /referrals/link-config` - Get referral link configuration
+- `POST /referrals/link-config` - Update referral settings
+- `GET /referrals/social-config` - Get social sharing settings
+- `GET /referrals/analytics` - Get referral analytics
+- `POST /referrals/links` - Create referral link
+
+### **VIP & Events**
+- `GET /vip/config` - Get VIP program configuration
+- `GET /vip/tiers` - List VIP tiers
+- `GET /vip/members` - List VIP members
+- `POST /vip/members` - Create VIP member
+
+### **AI Insights**
+- `GET /ai/insights` - Get AI customer insights
+- `GET /ai/opportunities` - Get business opportunities
+- `POST /ai/segments/create` - Create customer segment
 
 ## Next.js and Shopify Embedded Apps
 
@@ -106,7 +227,7 @@ development:
 - [Apollo](https://www.apollographql.com/) for interacting with the Shopify
   GraphQL API (Optional).
 - [SQLAlchemy]( ) for managing database connections and
-  migrations. 
+  migrations.
 ## Getting started
 
 ### Local Development
@@ -202,7 +323,57 @@ uvicorn backend.main:app --reload
 
 It exposes `/dashboard/overview` which returns loyalty metrics calculated from `backend/mock_data.py`.
 
- 
+
 
 The Next.js app includes a simple dashboard page at `/dashboard` that fetches these metrics from the FastAPI server. Start both the FastAPI backend and the Next.js dev server to see the data rendered in the app.
- 
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues**
+
+#### **"Failed to fetch" in Referral Program**
+- ✅ **Fixed**: Ensure backend is running on port 8004
+- ✅ **Fixed**: JWT middleware allows `/referrals/*` endpoints
+- ✅ **Fixed**: Frontend has graceful error handling
+
+#### **Backend Import Errors**
+- ✅ **Fixed**: All required models imported in `referral_service.py`
+- ✅ **Fixed**: Dependency injection working with `get_db()`
+
+#### **Database Connection Issues**
+```bash
+# Reset database
+docker-compose down -v
+docker-compose up -d postgres
+cd backend && alembic upgrade head
+```
+
+#### **Port Conflicts**
+```bash
+# Check what's using ports
+lsof -i :8004  # Backend
+lsof -i :3000  # Frontend
+
+# Kill processes if needed
+kill -9 <PID>
+```
+
+### **Development Tips**
+- Use `--reload` flag for auto-restart during development
+- Check browser console for frontend errors
+- Monitor backend logs for API issues
+- Test endpoints directly with curl or Postman
+
+## 🎯 **Recent Fixes**
+- ✅ Fixed referral system "Failed to fetch" error
+- ✅ Added JWT middleware bypass for referral endpoints
+- ✅ Implemented graceful error handling in frontend
+- ✅ Fixed import errors in backend services
+- ✅ Updated port configuration (8004)
+- ✅ Added comprehensive API documentation
+
+## 📚 **Documentation**
+- **API Docs**: http://127.0.0.1:8004/docs (when backend running)
+- **Database Schema**: See `backend/models_v2.py`
+- **Frontend Types**: See `web/app/types/`
+- **Migration Guide**: See `backend/MIGRATIONS.md`
