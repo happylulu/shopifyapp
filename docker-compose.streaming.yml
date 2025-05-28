@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # Redis for event streaming and Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Celery worker for event processing
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://loyalty_user:loyalty_pass@postgres:5432/loyalty_db
+    volumes:
+      - ./backend:/app
+    command: celery -A event_streaming.celery_app worker --loglevel=info --concurrency=4
+    restart: unless-stopped
+
+  # Celery beat for periodic tasks
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://loyalty_user:loyalty_pass@postgres:5432/loyalty_db
+    volumes:
+      - ./backend:/app
+    command: celery -A event_streaming.celery_app beat --loglevel=info
+    restart: unless-stopped
+
+  # Flower for Celery monitoring
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
+    depends_on:
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./backend:/app
+    command: celery -A event_streaming.celery_app flower --port=5555
+    restart: unless-stopped
+
+  # Event stream processor
+  event-processor:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.processor
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - REDIS_URL=redis://redis:6379/1
+      - DATABASE_URL=postgresql+asyncpg://loyalty_user:loyalty_pass@postgres:5432/loyalty_db
+    volumes:
+      - ./backend:/app
+    command: python event_processor_daemon.py
+    restart: unless-stopped
+    deploy:
+      replicas: 2  # Run multiple processors for scalability
+
+  # GraphQL API server
+  graphql-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.graphql
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://loyalty_user:loyalty_pass@postgres:5432/loyalty_db
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend:/app
+    command: uvicorn graphql_main:app --host 0.0.0.0 --port 8005 --reload
+    restart: unless-stopped
+
+  # Existing services (from main docker-compose.yml)
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: loyalty_db
+      POSTGRES_USER: loyalty_user
+      POSTGRES_PASSWORD: loyalty_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loyalty_user -d loyalty_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: loyalty_network
