@@ -1,14 +1,13 @@
 "use client";
 
 import { graphql } from "@/lib/gql";
-import { useAppBridge } from "@shopify/app-bridge-react";
 import { Button, LegacyCard as Card, Page, Text } from "@shopify/polaris";
 import Link from "next/link";
 import { useState } from "react";
-import { useAuthenticatedFetch } from "./hooks/useAuthenticatedFetch";
 import { doServerAction } from "./actions";
 import { useGraphQL } from "./hooks/useGraphQL";
 import AppLayout from "./components/AppLayout";
+import AppBridgeWrapper from "./components/AppBridgeWrapper";
 
 interface Data {
   name: string;
@@ -24,20 +23,26 @@ const GET_SHOP = graphql(`
 `);
 
 export default function Home() {
+  return (
+    <AppBridgeWrapper>
+      {(app, authFetch) => <HomeContent app={app} authFetch={authFetch} />}
+    </AppBridgeWrapper>
+  );
+}
+
+function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
   const [data, setData] = useState<Data | null>(null);
   const [serverActionResult, setServerActionResult] = useState<{
     status: "success" | "error";
   }>();
 
   // useGraphQL is a hook that uses Tanstack Query to query Shopify GraphQL, everything is typed!
-  const { 
-    data: graphqlData, 
-    isLoading: graphqlLoading, 
-    error: graphqlError, 
+  const {
+    data: graphqlData,
+    isLoading: graphqlLoading,
+    error: graphqlError,
   } = useGraphQL(GET_SHOP);
 
-  const app = useAppBridge();
-  const authFetch = useAuthenticatedFetch();
   const [testMessage, setTestMessage] = useState<string | null>(null);
 
   const handleGetAPIRequest = async () => {

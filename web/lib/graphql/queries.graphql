@@ -1,0 +1,265 @@
+# GraphQL Queries for Storefront & Admin
+# These will be used to generate TypeScript types and hooks
+
+# ============================================================================
+# STOREFRONT QUERIES
+# ============================================================================
+
+query GetCustomerLoyaltyProfile($customerId: String!) {
+  loyaltyProfile(customerId: $customerId) {
+    id
+    customer_id
+    points_balance
+    lifetime_points
+    current_tier {
+      id
+      name
+      level
+      min_points_required
+      description
+      benefits
+      icon_url
+      color
+    }
+    next_tier {
+      id
+      name
+      level
+      min_points_required
+      description
+    }
+    points_to_next_tier
+    tier_progress_percentage
+    member_since
+    last_activity
+  }
+}
+
+query GetAvailableRewards($customerId: String, $maxPoints: Int, $category: String) {
+  availableRewards(customerId: $customerId, maxPoints: $maxPoints, category: $category) {
+    id
+    name
+    description
+    points_cost
+    reward_type
+    value
+    image_url
+    category
+    available
+    terms_and_conditions
+    expires_at
+  }
+}
+
+query GetPointsHistory($customerId: String!, $limit: Int = 20, $offset: Int = 0) {
+  pointsHistory(customerId: $customerId, limit: $limit, offset: $offset) {
+    id
+    amount
+    transaction_type
+    reason
+    reference_id
+    created_at
+    expires_at
+  }
+}
+
+query GetEarningOpportunities($customerId: String!) {
+  earningOpportunities(customerId: $customerId) {
+    action
+    points
+    description
+    url
+    available
+  }
+}
+
+# ============================================================================
+# ADMIN QUERIES
+# ============================================================================
+
+query GetLoyaltyAnalytics {
+  loyaltyAnalytics {
+    total_customers
+    active_customers_30d
+    total_points_issued
+    total_points_redeemed
+    redemption_rate
+    average_points_per_customer
+    top_rewards {
+      reward {
+        id
+        name
+        points_cost
+      }
+      redemption_count
+      total_points_cost
+      popularity_rank
+      conversion_rate
+    }
+    customer_segments {
+      id
+      name
+      description
+      customer_count
+      total_points_awarded
+      average_order_value
+      created_at
+    }
+  }
+}
+
+query GetCustomerInsights($limit: Int = 50, $riskThreshold: Float = 0.7) {
+  customerInsights(limit: $limit, riskThreshold: $riskThreshold) {
+    customer {
+      id
+      email
+      first_name
+      last_name
+      created_at
+    }
+    risk_score
+    lifetime_value_prediction
+    recommended_actions
+    segment {
+      id
+      name
+      description
+    }
+    next_likely_purchase_days
+  }
+}
+
+query GetRulePerformance($ruleId: String, $timeframe: String = "30d") {
+  rulePerformance(ruleId: $ruleId, timeframe: $timeframe) {
+    rule_id
+    rule_name
+    execution_count
+    success_rate
+    average_execution_time_ms
+    conditions_met_rate
+    total_points_awarded
+  }
+}
+
+query GetEnhancedCustomerProfile($customerId: String!) {
+  enhancedLoyaltyProfile(customerId: $customerId) {
+    id
+    customer_id
+    points_balance
+    lifetime_points
+    current_tier {
+      name
+      level
+    }
+    transaction_history(limit: 10) {
+      id
+      amount
+      transaction_type
+      reason
+      created_at
+    }
+    predicted_churn_risk
+    lifetime_value_prediction
+    recommended_rewards {
+      id
+      name
+      points_cost
+      description
+    }
+  }
+}
+
+# ============================================================================
+# MUTATIONS
+# ============================================================================
+
+mutation RedeemReward($input: RedeemRewardInput!) {
+  redeemReward(input: $input) {
+    success
+    message
+    redemption_id
+    discount_code
+    points_deducted
+    new_balance
+  }
+}
+
+mutation TrackCustomerAction($input: TrackActionInput!) {
+  trackAction(input: $input)
+}
+
+mutation CreateReferralLink($input: CreateReferralLinkInput!) {
+  createReferralLink(input: $input) {
+    id
+    code
+    url
+    expires_at
+  }
+}
+
+# ============================================================================
+# FRAGMENTS
+# ============================================================================
+
+fragment TierInfo on Tier {
+  id
+  name
+  level
+  min_points_required
+  description
+  benefits
+  icon_url
+  color
+}
+
+fragment RewardInfo on Reward {
+  id
+  name
+  description
+  points_cost
+  reward_type
+  value
+  image_url
+  category
+  available
+  terms_and_conditions
+  expires_at
+}
+
+fragment CustomerInfo on Customer {
+  id
+  email
+  first_name
+  last_name
+  phone
+  tags
+  created_at
+  updated_at
+}
+
+fragment LoyaltyProfileInfo on LoyaltyProfile {
+  id
+  customer_id
+  points_balance
+  lifetime_points
+  current_tier {
+    ...TierInfo
+  }
+  next_tier {
+    ...TierInfo
+  }
+  points_to_next_tier
+  tier_progress_percentage
+  member_since
+  last_activity
+}
+
+fragment PointsTransactionInfo on PointsTransaction {
+  id
+  amount
+  transaction_type
+  reason
+  reference_id
+  created_at
+  expires_at
+}

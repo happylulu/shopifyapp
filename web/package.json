@@ -5,9 +5,15 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "start": "next start",
     "migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
-    "graphql-codegen": "graphql-codegen --config codegen.ts"
+    "graphql-codegen": "graphql-codegen --config codegen.ts",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch",
+    "generate-schema": "python ../backend/graphql_schema_generator.py",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@apollo/client": "^3.12.6",
@@ -19,10 +25,12 @@
     "@shopify/app-bridge-react": "^4.1.6",
     "@shopify/polaris": "^12.27.0",
     "@shopify/shopify-api": "^9.7.2",
-    "@tanstack/react-query": "^5.64.1",
+    "@tanstack/react-query": "^5.77.2",
+    "@tanstack/react-query-devtools": "^5.77.2",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "graphql-request": "^7.1.2",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0",
     "mongodb": "^5.9.2",
     "mongoose": "^7.8.4",
     "next": "14.1.3",
