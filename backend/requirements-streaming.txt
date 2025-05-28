@@ -1,0 +1,8 @@
+# Additional requirements for event streaming and GraphQL
+redis>=5.0.0
+celery>=5.3.0
+strawberry-graphql[fastapi]>=0.200.0
+httpx>=0.25.0
+kombu>=5.3.0
+flower>=2.0.0  # Celery monitoring
+redis-py-cluster>=2.1.0  # For Redis clustering

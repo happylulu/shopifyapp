@@ -44,6 +44,9 @@ from api_models import (
     TierResponse,
 )
 from referral_service import ReferralService
+from rule_api import router as rule_router
+from monitoring import monitoring_router
+from event_streaming import publish_loyalty_event
 
 # Import new AI services
 from ai_service import AIInsightsService
@@ -82,6 +85,12 @@ points_service = PointsService()
 referral_service = ReferralService()
 ai_service = AIInsightsService()  # New AI service
 vip_service = VIPService()  # New VIP service
+
+# Include rule engine router
+app.include_router(rule_router)
+
+# Include monitoring router
+app.include_router(monitoring_router)
 
 # Helper function to extract shop domain from headers (Shopify app pattern)
 def get_shop_domain(request: Request) -> str:
