@@ -1,0 +1,28 @@
+{
+  "name": "loyalty-widget",
+  "version": "1.0.0",
+  "description": "Shopify UI Extension for Loyalty Program",
+  "main": "src/Checkout.tsx",
+  "scripts": {
+    "build": "shopify app build",
+    "dev": "shopify app dev"
+  },
+  "dependencies": {
+    "@shopify/ui-extensions": "^2023.10.0",
+    "@shopify/ui-extensions-react": "^2023.10.0",
+    "react": "^18.0.0",
+    "react-reconciler": "^0.29.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "shopify",
+    "ui-extension",
+    "loyalty",
+    "checkout"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

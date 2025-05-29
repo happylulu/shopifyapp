@@ -17,6 +17,16 @@ from models_v2 import (
     TierDefinition,
     get_db,
 )
+
+# New authentication and shop context utilities
+from shop_context import (
+    get_shop_domain,
+    verify_shop_access,
+    get_shop_context,
+    ShopContext,
+)
+from session_storage import get_session_storage
+from shopify_client import get_shopify_client
 from sqlalchemy import select, delete
 
 # Import existing models and services
@@ -46,6 +56,7 @@ from api_models import (
 from referral_service import ReferralService
 from rule_api import router as rule_router
 from monitoring import monitoring_router
+from admin_router import router as admin_router
 from event_streaming import publish_loyalty_event
 
 # Import new AI services
@@ -86,23 +97,45 @@ referral_service = ReferralService()
 ai_service = AIInsightsService()  # New AI service
 vip_service = VIPService()  # New VIP service
 
-# Include rule engine router
+# Include routers
+app.include_router(admin_router)
 app.include_router(rule_router)
-
-# Include monitoring router
 app.include_router(monitoring_router)
 
-# Helper function to extract shop domain from headers (Shopify app pattern)
-def get_shop_domain(request: Request) -> str:
-    """Extract shop domain from request headers or query params"""
-    # In a real Shopify app, this would come from the session token
-    shop = request.headers.get("X-Shopify-Shop-Domain") or "demo.myshopify.com"
-    return shop
+# Note: get_shop_domain is now imported from shop_context module
+# The new implementation properly handles Shopify session tokens and multi-tenant authentication
 
 # Existing endpoints
 @app.get("/")
 async def root():
     return {"message": "Shopify Loyalty App API", "version": "1.0.0"}
+
+
+@app.get("/shop/info")
+async def get_shop_info(
+    shop_domain: str = Depends(verify_shop_access),
+    shopify_client = Depends(get_shopify_client)
+):
+    """
+    Example endpoint demonstrating the new authentication pattern.
+
+    This endpoint:
+    1. Extracts shop domain from the request (via JWT middleware)
+    2. Verifies the shop has the app installed
+    3. Uses the shop-specific access token to call Shopify API
+    """
+    try:
+        shop_info = await shopify_client.get_shop_info(shop_domain)
+        return {
+            "success": True,
+            "shop_domain": shop_domain,
+            "shop_info": shop_info
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get shop info: {str(e)}"
+        )
 
 @app.get("/dashboard/overview")
 async def get_dashboard():

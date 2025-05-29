@@ -11,6 +11,15 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
+# Base Response Model
+class BaseResponse(BaseModel):
+    """Base response model for all API endpoints"""
+    success: bool
+    message: Optional[str] = None
+    data: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+
 # Enums
 class SocialPlatform(str, Enum):
     FACEBOOK = "facebook"

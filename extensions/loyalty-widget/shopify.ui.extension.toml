@@ -1,0 +1,39 @@
+api_version = "2024-10"
+
+[[extensions]]
+type = "ui_extension"
+name = "loyalty-widget"
+handle = "loyalty-widget"
+
+[[extensions.targeting]]
+target = "purchase.checkout.block.render"
+module = "./src/Checkout.tsx"
+
+[extensions.capabilities]
+network_access = true
+block_progress = true
+
+[extensions.settings]
+[[extensions.settings.fields]]
+key = "title"
+type = "single_line_text_field"
+name = "Widget Title"
+description = "Title displayed in the loyalty widget"
+
+[[extensions.settings.fields]]
+key = "show_points"
+type = "boolean"
+name = "Show Points Balance"
+description = "Display customer's current points balance"
+
+[[extensions.settings.fields]]
+key = "show_tier"
+type = "boolean"
+name = "Show Tier Status"
+description = "Display customer's current tier"
+
+[[extensions.settings.fields]]
+key = "show_rewards"
+type = "boolean"
+name = "Show Available Rewards"
+description = "Display rewards available for redemption"

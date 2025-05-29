@@ -88,8 +88,25 @@ SCOPES=read_products,write_products,read_customers,write_customers,read_orders,w
 # Backend Configuration
 BACKEND_URL=http://127.0.0.1:8004
 
-# Session Storage
+# Session Storage (shared with FastAPI)
+DATABASE_URL=postgresql://user:pass@host/db
 SESSION_SECRET=your-session-secret-key
+```
+
+Create `backend/.env`:
+```bash
+# Database (shared with Next.js for session storage)
+DATABASE_URL=postgresql+asyncpg://user:pass@host/db
+
+# Shopify Configuration (for token verification)
+SHOPIFY_API_KEY=your_api_key_here
+SHOPIFY_API_SECRET=your_api_secret_here
+
+# Note: No SHOPIFY_ACCESS_TOKEN needed for multi-tenant apps
+# Access tokens are retrieved per-shop from session storage
+
+# OpenAI Configuration (optional)
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### **3. Database Setup**

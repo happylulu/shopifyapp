@@ -3,7 +3,7 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://minolta-wanted-extraction-simply.trycloudflare.com"
+application_url = "https://plug-ids-interesting-resume.trycloudflare.com"
 embedded = true
 
 [build]
@@ -13,15 +13,43 @@ include_config_on_deploy = true
 [webhooks]
 api_version = "2025-04"
 
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/api/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/create" ]
+  uri = "/api/webhooks/customers/create"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request" ]
+  uri = "/api/webhooks/customers/data_request"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/redact" ]
+  uri = "/api/webhooks/customers/redact"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/paid" ]
+  uri = "/api/webhooks/orders/paid"
+
+  [[webhooks.subscriptions]]
+  topics = [ "refunds/create" ]
+  uri = "/api/webhooks/refunds/create"
+
+  [[webhooks.subscriptions]]
+  topics = [ "shop/redact" ]
+  uri = "/api/webhooks/shop/redact"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_products,read_orders,write_orders,read_customers"
+scopes = "read_customers,read_orders,read_products,write_orders"
 
 [auth]
 redirect_urls = [
-  "https://minolta-wanted-extraction-simply.trycloudflare.com/auth/callback",
-  "https://minolta-wanted-extraction-simply.trycloudflare.com/auth/shopify/callback",
-  "https://minolta-wanted-extraction-simply.trycloudflare.com/api/auth/callback"
+  "https://plug-ids-interesting-resume.trycloudflare.com/auth/callback",
+  "https://plug-ids-interesting-resume.trycloudflare.com/auth/shopify/callback",
+  "https://plug-ids-interesting-resume.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
