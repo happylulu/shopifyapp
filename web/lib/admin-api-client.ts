@@ -108,7 +108,7 @@ export class AdminApiClient {
   private baseUrl: string;
   private apiKey: string;
 
-  constructor(baseUrl: string = 'http://localhost:8002', apiKey: string = 'dev-key') {
+  constructor(baseUrl: string = 'http://localhost:8005', apiKey: string = 'dev-key') {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
   }
@@ -118,7 +118,7 @@ export class AdminApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const response = await fetch(url, {
       ...options,
       headers: {

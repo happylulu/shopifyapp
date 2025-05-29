@@ -1,13 +1,18 @@
 "use client";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { doWebhookRegistration, storeToken } from "../actions";
 
-// Component that uses App Bridge (only rendered in Shopify environment)
+// Component that uses App Bridge (only rendered when App Bridge is available)
 function ShopifySessionHandler() {
   const app = useAppBridge();
 
   useEffect(() => {
+    if (!app) {
+      console.warn("App Bridge not available in ShopifySessionHandler");
+      return;
+    }
+
     app.idToken().then((token: string) => {
       storeToken(token)
         .then(() => {
@@ -36,22 +41,12 @@ export default function SessionProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // Check if we're in a Shopify environment
-  const isShopifyEnvironment = typeof window !== 'undefined' &&
-    (window.location.hostname.includes('shopify') ||
-     window.location.search.includes('shop=') ||
-     window.location.hostname.includes('ngrok') ||
-     process.env.NODE_ENV === 'production');
-
   useEffect(() => {
-    if (!isShopifyEnvironment) {
-      console.log("Running in development mode without App Bridge");
-    }
-  }, [isShopifyEnvironment]);
+    console.log("SessionProvider initialized");
+  }, []);
 
   return (
     <>
-      {isShopifyEnvironment && <ShopifySessionHandler />}
       {children}
     </>
   );

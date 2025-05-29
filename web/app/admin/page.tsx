@@ -18,6 +18,7 @@ import {
 } from '@shopify/polaris';
 
 import { useAdmin } from './layout';
+import { TokenTester } from '../components/TokenTester';
 
 // Mock data - replace with real API calls
 const mockDashboardData = {
@@ -169,6 +170,11 @@ export default function AdminDashboard() {
               </BlockStack>
             </Card>
           </InlineStack>
+        </Layout.Section>
+
+        {/* Authentication Testing */}
+        <Layout.Section>
+          <TokenTester />
         </Layout.Section>
 
         {/* Program Health Banner */}
