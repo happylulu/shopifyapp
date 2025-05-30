@@ -829,31 +829,10 @@ async def get_db():
 
 
 async def init_db() -> None:
-    """Initialize database with migrations"""
-    import subprocess
-    from pathlib import Path
+    """Initialize database - using Prisma for schema management"""
+    print("✅ Database initialization skipped - using Prisma for schema management")
+    print("   Run 'npx prisma migrate dev' in the web/ directory to manage database schema")
 
-    backend_dir = Path(__file__).parent
-
-    try:
-        # Try to use Alembic migrations
-        result = subprocess.run(
-            ["alembic", "upgrade", "head"],
-            cwd=backend_dir,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-
-        if result.returncode == 0:
-            print("✅ Database initialized with migrations!")
-        else:
-            print(f"⚠️  Migration failed: {result.stderr}")
-            print("Falling back to create_all()...")
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-
-    except Exception as e:
-        print(f"⚠️  Migration system unavailable ({e}), using create_all()...")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    # Note: We're using Prisma (from Next.js) for database schema management
+    # instead of Alembic. This avoids conflicts between the two migration systems.
+    # The database tables are created and managed by Prisma migrations.

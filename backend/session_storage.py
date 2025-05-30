@@ -32,19 +32,26 @@ def load_env():
 # Load environment before getting DATABASE_URL
 load_env()
 
-# Use the same database URL as the main models
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Import the shared database engine from models_v2
+try:
+    from models_v2 import engine, async_session
+    # Use the shared engine and session factory
+    session_engine = engine
+    SessionStorageSession = async_session
+except ImportError:
+    # Fallback to creating our own engine if models_v2 is not available
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    raise ValueError(
-        "DATABASE_URL environment variable is required. "
-        "Please set it to your PostgreSQL connection string, e.g.: "
-        "postgresql+asyncpg://user:pass@localhost/dbname"
-    )
+    if not DATABASE_URL:
+        raise ValueError(
+            "DATABASE_URL environment variable is required. "
+            "Please set it to your PostgreSQL connection string, e.g.: "
+            "postgresql+asyncpg://user:pass@localhost/dbname"
+        )
 
-# Create async engine for session storage
-session_engine = create_async_engine(DATABASE_URL, echo=False)
-SessionStorageSession = async_sessionmaker(session_engine, class_=AsyncSession, expire_on_commit=False)
+    # Create async engine for session storage
+    session_engine = create_async_engine(DATABASE_URL, echo=False)
+    SessionStorageSession = async_sessionmaker(session_engine, class_=AsyncSession, expire_on_commit=False)
 
 # Base for session storage models
 SessionBase = declarative_base()
@@ -65,8 +72,8 @@ class ShopifySession(SessionBase):
     shop = Column(String, nullable=False)
     state = Column(String, nullable=False)
     apiKey = Column(String, nullable=False)
-    createdAt = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updatedAt = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    createdAt = Column(DateTime, nullable=False)
+    updatedAt = Column(DateTime, nullable=False)
 
 
 class SessionStorageService:

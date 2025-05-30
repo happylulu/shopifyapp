@@ -86,14 +86,27 @@ class JWTMiddleware(BaseHTTPMiddleware):
         "/rewards/",
         "/tiers/",
         # Add referral endpoints
-        "/referrals/"
+        "/referrals/",
+        # Add dashboard endpoints for Next.js backend access
+        "/dashboard/overview",
+        "/dashboard/analytics",
+        "/dashboard/customers",
+        "/admin/",
+        # Add webhook API endpoints (called by Next.js webhook handlers)
+        "/api/points/award",
+        "/api/points/deduct",
+        "/api/tiers/evaluate",
+        "/api/orders/",
     }
 
     async def dispatch(self, request: Request, call_next):
         # Skip JWT validation for excluded paths
         if (request.url.path in self.EXCLUDED_PATHS or
             request.url.path.startswith("/loyalty/") or
-            request.url.path.startswith("/referrals/")):
+            request.url.path.startswith("/referrals/") or
+            request.url.path.startswith("/dashboard/") or
+            request.url.path.startswith("/admin/") or
+            request.url.path.startswith("/api/")):
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization")
