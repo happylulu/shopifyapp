@@ -97,6 +97,11 @@ class JWTMiddleware(BaseHTTPMiddleware):
         "/api/points/deduct",
         "/api/tiers/evaluate",
         "/api/orders/",
+        # Add debug endpoints
+        "/debug/simple",
+        "/debug/session-storage",
+        "/debug/customer-points",
+        "/dashboard/test-real-data",
     }
 
     async def dispatch(self, request: Request, call_next):
@@ -106,7 +111,8 @@ class JWTMiddleware(BaseHTTPMiddleware):
             request.url.path.startswith("/referrals/") or
             request.url.path.startswith("/dashboard/") or
             request.url.path.startswith("/admin/") or
-            request.url.path.startswith("/api/")):
+            request.url.path.startswith("/api/") or
+            request.url.path.startswith("/debug/")):
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization")

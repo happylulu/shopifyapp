@@ -3,7 +3,9 @@ import {
   shopifyApi,
   LATEST_API_VERSION,
   LogSeverity,
+  Session,
 } from "@shopify/shopify-api";
+import { storeSession, loadSession, deleteSession, findSessionsByShop } from "../db/session-storage";
 
 // Get hostname from various possible environment variables
 const getHostName = () => {
@@ -31,6 +33,48 @@ const shopify = shopifyApi({
       process.env.NODE_ENV === "development"
         ? LogSeverity.Debug
         : LogSeverity.Error,
+  },
+  sessionStorage: {
+    storeSession: async (session: Session) => {
+      console.log('🔍 [Shopify Context] Storing session via custom storage');
+      await storeSession(session);
+      return true;
+    },
+    loadSession: async (id: string) => {
+      console.log('🔍 [Shopify Context] Loading session via custom storage');
+      return await loadSession(id);
+    },
+    deleteSession: async (id: string) => {
+      console.log('🔍 [Shopify Context] Deleting session via custom storage');
+      return await deleteSession(id);
+    },
+    deleteSessions: async (ids: string[]) => {
+      console.log('🔍 [Shopify Context] Deleting multiple sessions');
+      await Promise.all(ids.map(id => deleteSession(id)));
+      return true;
+    },
+    findSessionsByShop: async (shop: string) => {
+      console.log('🔍 [Shopify Context] Finding sessions by shop:', shop);
+      return await findSessionsByShop(shop);
+    },
+  },
+  webhooks: {
+    "orders/paid": {
+      deliveryMethod: "http",
+      callbackUrl: "/api/webhooks/orders/paid",
+    },
+    "orders/create": {
+      deliveryMethod: "http",
+      callbackUrl: "/api/webhooks/orders/create",
+    },
+    "customers/create": {
+      deliveryMethod: "http",
+      callbackUrl: "/api/webhooks/customers/create",
+    },
+    "app/uninstalled": {
+      deliveryMethod: "http",
+      callbackUrl: "/api/webhooks/app/uninstalled",
+    },
   },
 });
 

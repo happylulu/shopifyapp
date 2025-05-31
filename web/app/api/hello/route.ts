@@ -14,7 +14,7 @@ type Data = {
 
 export async function GET(req: Request) {
   // session token is located in the request headers
-  const validSession = await verifyRequest(req, true); // could use middleware for this?
+  const validSession = await verifyRequest(req, false); // Use offline sessions for consistency with GraphQL API
   console.log("validSession", validSession);
 
   return NextResponse.json<APIResponse<Data>>({

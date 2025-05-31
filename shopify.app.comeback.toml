@@ -3,7 +3,7 @@
 client_id = "49e6ec7fb69ed11a4e11f2d7231d6ea5"
 name = "comeback"
 handle = "comeback-3"
-application_url = "https://projector-magnitude-manufactured-automation.trycloudflare.com"
+application_url = "https://loyalbee-dev.ngrok-free.app"
 embedded = true
 
 [build]
@@ -47,9 +47,9 @@ scopes = "read_customers,read_orders,read_products,write_orders"
 
 [auth]
 redirect_urls = [
-  "https://projector-magnitude-manufactured-automation.trycloudflare.com/auth/callback",
-  "https://projector-magnitude-manufactured-automation.trycloudflare.com/auth/shopify/callback",
-  "https://projector-magnitude-manufactured-automation.trycloudflare.com/api/auth/callback"
+  "https://loyalbee-dev.ngrok-free.app/auth/callback",
+  "https://loyalbee-dev.ngrok-free.app/auth/shopify/callback",
+  "https://loyalbee-dev.ngrok-free.app/api/auth/callback"
 ]
 
 [pos]

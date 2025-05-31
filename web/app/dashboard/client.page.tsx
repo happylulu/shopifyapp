@@ -24,6 +24,7 @@ export default function DashboardClient() {
       try {
         const res = await fetch("http://localhost:8000/dashboard/overview");
         const json = await res.json();
+        console.log("Dashboard data received:", json); // Debug log
         setData(json);
       } catch (err) {
         console.error("Failed fetching dashboard", err);
@@ -43,72 +44,72 @@ export default function DashboardClient() {
                 <BlockStack gap="200">
                   <Text as="h3" variant="headingMd">Total Points Issued</Text>
                   <Text as="h2" variant="headingLg">
-                    {data.total_points_issued.value.toLocaleString()}
+                    {data?.total_points_issued?.value?.toLocaleString() ?? "0"}
                   </Text>
                   <Badge
                     tone={
-                      (data.total_points_issued.percent_change ?? 0) >= 0
+                      (data?.total_points_issued?.percent_change ?? 0) >= 0
                         ? "success"
                         : "critical"
                     }
                   >
-                    {`${data.total_points_issued.percent_change ?? "N/A"}%`}
+                    {`${data?.total_points_issued?.percent_change ?? "N/A"}%`}
                   </Badge>
                 </BlockStack>
               </Card>
-              
+
               <Card>
                 <BlockStack gap="200">
                   <Text as="h3" variant="headingMd">Active Members</Text>
                   <Text as="h2" variant="headingLg">
-                    {data.active_members.value.toLocaleString()}
+                    {data?.active_members?.value?.toLocaleString() ?? "0"}
                   </Text>
                   <Badge
                     tone={
-                      (data.active_members.percent_change ?? 0) >= 0
+                      (data?.active_members?.percent_change ?? 0) >= 0
                         ? "success"
                         : "critical"
                     }
                   >
-                    {`${data.active_members.percent_change ?? "N/A"}%`}
+                    {`${data?.active_members?.percent_change ?? "N/A"}%`}
                   </Badge>
                 </BlockStack>
               </Card>
             </InlineStack>
-            
+
             <InlineStack gap="400">
               <Card>
                 <BlockStack gap="200">
                   <Text as="h3" variant="headingMd">Points Redeemed</Text>
                   <Text as="h2" variant="headingLg">
-                    {data.points_redeemed.value.toLocaleString()}
+                    {data?.points_redeemed?.value?.toLocaleString() ?? "0"}
                   </Text>
                   <Badge
                     tone={
-                      (data.points_redeemed.percent_change ?? 0) >= 0
+                      (data?.points_redeemed?.percent_change ?? 0) >= 0
                         ? "success"
                         : "critical"
                     }
                   >
-                    {`${data.points_redeemed.percent_change ?? "N/A"}%`}
+                    {`${data?.points_redeemed?.percent_change ?? "N/A"}%`}
                   </Badge>
                 </BlockStack>
               </Card>
-              
+
               <Card>
                 <BlockStack gap="200">
                   <Text as="h3" variant="headingMd">Revenue Impact</Text>
                   <Text as="h2" variant="headingLg">
-                    ${data.revenue_impact.value.toFixed(2)}
+                    ${data?.revenue_impact?.value?.toFixed(2) ?? "0.00"}
                   </Text>
                   <Badge
                     tone={
-                      (data.revenue_impact.percent_change ?? 0) >= 0
+                      (data?.revenue_impact?.percent_change ?? 0) >= 0
                         ? "success"
                         : "critical"
                     }
                   >
-                    {`${data.revenue_impact.percent_change ?? "N/A"}%`}
+                    {`${data?.revenue_impact?.percent_change ?? "N/A"}%`}
                   </Badge>
                 </BlockStack>
               </Card>

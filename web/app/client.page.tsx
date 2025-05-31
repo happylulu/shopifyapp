@@ -3,7 +3,7 @@
 import { graphql } from "@/lib/gql";
 import { Button, LegacyCard as Card, Page, Text } from "@shopify/polaris";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { doServerAction } from "./actions";
 import { useGraphQL } from "./hooks/useGraphQL";
 import AppLayout from "./components/AppLayout";
@@ -35,6 +35,7 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
   const [serverActionResult, setServerActionResult] = useState<{
     status: "success" | "error";
   }>();
+  const [isClient, setIsClient] = useState(false);
 
   // useGraphQL is a hook that uses Tanstack Query to query Shopify GraphQL, everything is typed!
   const {
@@ -45,6 +46,11 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
 
   const [testMessage, setTestMessage] = useState<string | null>(null);
 
+  // Ensure we're on the client side before using App Bridge
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleGetAPIRequest = async () => {
     try {
       // global fetch has tokens automatically added
@@ -54,6 +60,22 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
       setData(result.data);
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const handleServerAction = async () => {
+    if (!isClient || !app) {
+      console.log('Not ready for server action - waiting for client');
+      return;
+    }
+
+    try {
+      const token = await app.idToken();
+      const response = await doServerAction(token);
+      setServerActionResult(response);
+    } catch (error) {
+      console.error('Server action failed:', error);
+      setServerActionResult({ status: "error" });
     }
   };
 
@@ -89,11 +111,7 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
           title="React server actions"
           primaryFooterAction={{
             content: "Server action",
-            onAction: async () => {
-              const token = await app.idToken();
-              const response = await doServerAction(token);
-              setServerActionResult(response);
-            },
+            onAction: handleServerAction,
           }}
         >
           <Text as="p" variant="bodyMd">
@@ -130,20 +148,26 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
           </Text>
           <Button
             onClick={async () => {
-              const res = await fetch("shopify:admin/api/graphql.json", {
-                method: "POST",
-                body: JSON.stringify({
-                  query: /* GraphQL */ `
-                    query {
-                      shop {
-                        name
+              if (!isClient) return;
+              
+              try {
+                const res = await fetch("shopify:admin/api/graphql.json", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    query: /* GraphQL */ `
+                      query {
+                        shop {
+                          name
+                        }
                       }
-                    }
-                  `,
-                }),
-              });
-              const { data } = await res.json();
-              console.log("graphql response", data);
+                    `,
+                  }),
+                });
+                const { data } = await res.json();
+                console.log("graphql response", data);
+              } catch (error) {
+                console.error("GraphQL query failed:", error);
+              }
             }}
           >
             GraphQL Query - Check the console for the response
@@ -156,9 +180,15 @@ function HomeContent({ app, authFetch }: { app: any; authFetch: any }) {
           primaryFooterAction={{
             content: "Call /api/test",
             onAction: async () => {
-              const res = await authFetch("/api/test");
-              const json = await res.json();
-              setTestMessage(json.message);
+              if (!isClient || !authFetch) return;
+              
+              try {
+                const res = await authFetch("/api/test");
+                const json = await res.json();
+                setTestMessage(json.message);
+              } catch (error) {
+                console.error("Authenticated fetch failed:", error);
+              }
             },
           }}
         >

@@ -14,7 +14,7 @@ export async function doServerAction(sessionIdToken: string): Promise<{
   try {
     const {
       session: { shop },
-    } = await handleSessionToken(sessionIdToken);
+    } = await handleSessionToken(sessionIdToken, false);
 
     return {
       status: "success",
@@ -41,6 +41,6 @@ export async function storeToken(sessionToken: string) {
  * Register the webooks that we want setup.
  */
 export async function doWebhookRegistration(sessionToken: string) {
-  const { session } = await handleSessionToken(sessionToken);
+  const { session } = await handleSessionToken(sessionToken, false);
   await registerWebhooks(session);
 }

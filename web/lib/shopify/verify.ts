@@ -42,8 +42,14 @@ export async function verifyRequest(
   req: Request,
   isOnline: boolean,
 ): Promise<{ shop: string; session: Session }> {
+  console.log('🔍 [verifyRequest] Called with isOnline:', isOnline);
+  
   const bearerPresent = req.headers.get("authorization")?.startsWith("Bearer ");
   const sessionToken = req.headers.get("authorization")?.replace("Bearer ", "");
+  
+  console.log('🔍 [verifyRequest] Bearer present:', bearerPresent);
+  console.log('🔍 [verifyRequest] Session token present:', !!sessionToken);
+  
   if (!bearerPresent || !sessionToken) {
     throw new Error("No bearer or session token present");
   }
@@ -67,6 +73,13 @@ export async function tokenExchange({
   online?: boolean;
   store?: boolean;
 }): Promise<Session> {
+  console.log('🔍 [tokenExchange] Called with:', {
+    shop,
+    online,
+    store,
+    hasSessionToken: !!sessionToken
+  });
+
   const response = await shopify.auth.tokenExchange({
     shop,
     sessionToken,
@@ -74,10 +87,22 @@ export async function tokenExchange({
       ? RequestedTokenType.OnlineAccessToken
       : RequestedTokenType.OfflineAccessToken,
   });
+  
   const { session } = response;
+  console.log('🔍 [tokenExchange] Received session:', {
+    id: session.id,
+    shop: session.shop,
+    isOnline: session.isOnline,
+    hasAccessToken: !!session.accessToken
+  });
+  
   if (store) {
+    console.log('🔍 [tokenExchange] Storing session in database...');
     await storeSession(session);
+  } else {
+    console.log('⚠️ [tokenExchange] NOT storing session (store=false)');
   }
+  
   return session;
 }
 
@@ -92,8 +117,15 @@ export async function handleSessionToken(
   online?: boolean,
   store?: boolean,
 ): Promise<{ shop: string; session: Session }> {
+  console.log('🔍 [handleSessionToken] Called with:', {
+    online,
+    store,
+    hasSessionToken: !!sessionToken
+  });
+  
   // Handle development/mock tokens gracefully
   if (sessionToken.includes('mock') || sessionToken.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrLXNob3AiLCJpYXQiOjE2MzQ1Njc4OTB9.mock-signature')) {
+    console.log('🔍 [handleSessionToken] Using mock session');
     // Create a mock session for development
     const mockShop = 'demo.myshopify.com';
     const mockSession = new Session({
@@ -110,12 +142,18 @@ export async function handleSessionToken(
 
   // Handle real tokens in production/embedded environment
   try {
+    console.log('🔍 [handleSessionToken] Processing real Shopify token');
     const payload = await shopify.session.decodeSessionToken(sessionToken);
     const shop = payload.dest.replace("https://", "");
-    const session = await tokenExchange({ shop, sessionToken, online, store });
+    console.log('🔍 [handleSessionToken] Decoded shop:', shop);
+    
+    // Store sessions by default to ensure they're available for GraphQL API
+    const session = await tokenExchange({ shop, sessionToken, online, store: store ?? true });
+    console.log('✅ [handleSessionToken] Token exchange completed');
+    
     return { shop, session };
   } catch (error) {
-    console.warn('Failed to decode session token, falling back to mock session:', error);
+    console.warn('❌ [handleSessionToken] Failed to decode session token, falling back to mock session:', error);
     // Fallback to mock session if token decoding fails
     const mockShop = 'demo.myshopify.com';
     const mockSession = new Session({

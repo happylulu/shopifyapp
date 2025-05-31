@@ -1,95 +1,83 @@
 import { Session } from "@prisma/client";
 import { Session as ShopifySession } from "@shopify/shopify-api";
 import prisma from "./prisma-connect";
-const apiKey = process.env.SHOPIFY_API_KEY || "";
+
+// Get API key from environment with fallback
+const apiKey = process.env.SHOPIFY_API_KEY || "49e6ec7fb69ed11a4e11f2d7231d6ea5";
 
 /**
  * Stores the session in the database
  * This could be usedful if we need to do something with the
  * access token later
  */
-export async function storeSession(session: ShopifySession) {
-  await prisma.session.upsert({
-    where: { id: session.id },
-    update: {
-      shop: session.shop,
-      accessToken: session.accessToken,
-      scope: session.scope,
-      expires: session.expires,
-      isOnline: session.isOnline,
-      state: session.state,
-      apiKey,
-    },
-    create: {
-      id: session.id,
-      shop: session.shop,
-      accessToken: session.accessToken,
-      scope: session.scope,
-      expires: session.expires,
-      isOnline: session.isOnline,
-      state: session.state,
-      apiKey,
-    },
-  });
-
-  if (session.onlineAccessInfo) {
-    const onlineAccessInfo = await prisma.onlineAccessInfo.upsert({
-      where: { sessionId: session.id },
+export async function storeSession(session: ShopifySession): Promise<boolean> {
+  console.log('➡️ [DB Session Storage] storeSession CALLED with session ID:', session.id, 'Shop:', session.shop);
+  try {
+    const storedSession = await prisma.session.upsert({
+      where: { id: session.id },
       update: {
-        expiresIn: session.onlineAccessInfo.expires_in,
-        associatedUserScope: session.onlineAccessInfo.associated_user_scope,
+        shop: session.shop,
+        state: session.state,
+        isOnline: session.isOnline,
+        accessToken: session.accessToken,
+        expires: session.expires,
+        scope: session.scope,
+        apiKey: apiKey,
       },
       create: {
-        sessionId: session.id,
-        expiresIn: session.onlineAccessInfo.expires_in,
-        associatedUserScope: session.onlineAccessInfo.associated_user_scope,
+        id: session.id,
+        shop: session.shop,
+        state: session.state,
+        isOnline: session.isOnline,
+        accessToken: session.accessToken,
+        expires: session.expires,
+        scope: session.scope,
+        apiKey: apiKey,
       },
     });
-
-    const { associated_user } = session.onlineAccessInfo;
-    const associatedUser = await prisma.associatedUser.upsert({
-      where: { onlineAccessInfoId: onlineAccessInfo.id },
-      update: {
-        firstName: associated_user.first_name,
-        lastName: associated_user.last_name,
-        email: associated_user.email,
-        emailVerified: associated_user.email_verified,
-        accountOwner: associated_user.account_owner,
-        locale: associated_user.locale,
-        collaborator: associated_user.collaborator,
-        userId: associated_user.id,
-      },
-      create: {
-        onlineAccessInfoId: onlineAccessInfo.id,
-        firstName: associated_user.first_name,
-        lastName: associated_user.last_name,
-        email: associated_user.email,
-        emailVerified: associated_user.email_verified,
-        accountOwner: associated_user.account_owner,
-        locale: associated_user.locale,
-        collaborator: associated_user.collaborator,
-        userId: associated_user.id,
-      },
-    });
+    console.log('✅ [DB Session Storage] storeSession SUCCEEDED for session ID:', session.id, 'DB ID:', storedSession.id);
+    return true;
+  } catch (error: any) {
+    console.error('❌ [DB Session Storage] storeSession FAILED for session ID:', session.id, 'Error:', error.message, error.stack);
+    // Depending on how shopify-api handles this, you might re-throw or return false
+    // For now, let's return false as per the interface suggestion for custom stores
+    return false;
   }
 }
 
-export async function loadSession(id: string) {
-  const session = await prisma.session.findUnique({
-    where: { id },
-  });
-
-  if (session) {
-    return generateShopifySessionFromDB(session);
-  } else {
-    throw new SessionNotFoundError();
+/**
+ * Loads the session from the database
+ */
+export async function loadSession(id: string): Promise<ShopifySession | undefined> {
+  console.log('➡️ [DB Session Storage] loadSession CALLED with ID:', id);
+  try {
+    const session = await prisma.session.findUnique({ where: { id } });
+    if (!session) {
+      console.log('🔶 [DB Session Storage] loadSession: No session found for ID:', id);
+      return undefined;
+    }
+    console.log('✅ [DB Session Storage] loadSession SUCCEEDED for ID:', id);
+    // Transform Prisma session to ShopifySession
+    return new ShopifySession(session as any); // You might need to map fields if names differ
+  } catch (error: any) {
+    console.error('❌ [DB Session Storage] loadSession FAILED for ID:', id, 'Error:', error.message, error.stack);
+    return undefined;
   }
 }
 
-export async function deleteSession(id: string) {
-  await prisma.session.delete({
-    where: { id },
-  });
+/**
+ * Deletes the session from the database
+ */
+export async function deleteSession(id: string): Promise<boolean> {
+  console.log('➡️ [DB Session Storage] deleteSession CALLED with ID:', id);
+  try {
+    await prisma.session.delete({ where: { id } });
+    console.log('✅ [DB Session Storage] deleteSession SUCCEEDED for ID:', id);
+    return true;
+  } catch (error: any) {
+    console.error('❌ [DB Session Storage] deleteSession FAILED for ID:', id, 'Error:', error.message, error.stack);
+    return false;
+  }
 }
 
 export async function deleteSessions(ids: string[]) {
@@ -104,19 +92,18 @@ export async function cleanUpSession(shop: string, accessToken: string) {
   });
 }
 
-export async function findSessionsByShop(shop: string) {
-  const sessions = await prisma.session.findMany({
-    where: { shop, apiKey },
-    include: {
-      onlineAccessInfo: {
-        include: {
-          associatedUser: true,
-        },
-      },
-    },
-  });
-
-  return sessions.map((session) => generateShopifySessionFromDB(session));
+export async function findSessionsByShop(shop: string): Promise<ShopifySession[]> {
+  console.log('➡️ [DB Session Storage] findSessionsByShop CALLED for shop:', shop, 'using apiKey:', apiKey);
+  try {
+    const sessions = await prisma.session.findMany({
+      where: { shop, apiKey }, // Ensure apiKey is part of the query if it's part of the uniqueness/filtering
+    });
+    console.log(`✅ [DB Session Storage] findSessionsByShop found ${sessions.length} sessions for shop: ${shop}`);
+    return sessions.map((session) => new ShopifySession(session as any)); // Map to ShopifySession
+  } catch (error: any) {
+    console.error('❌ [DB Session Storage] findSessionsByShop FAILED for shop:', shop, 'Error:', error.message, error.stack);
+    return [];
+  }
 }
 
 function generateShopifySessionFromDB(session: Session) {
