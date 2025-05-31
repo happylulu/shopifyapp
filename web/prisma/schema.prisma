@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,25 +16,24 @@ model Session {
   shop             String
   state            String
   apiKey           String
-  onlineAccessInfo OnlineAccessInfo?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  onlineAccessInfo OnlineAccessInfo?
 }
 
 model OnlineAccessInfo {
   id                  String          @id @default(uuid())
-  session             Session?        @relation(fields: [sessionId], references: [id])
   sessionId           String?         @unique
   expiresIn           Int
   associatedUserScope String
-  associatedUser      AssociatedUser?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
+  associatedUser      AssociatedUser?
+  session             Session?        @relation(fields: [sessionId], references: [id])
 }
 
 model AssociatedUser {
   id                 String            @id @default(uuid())
-  onlineAccessInfo   OnlineAccessInfo? @relation(fields: [onlineAccessInfoId], references: [id])
   onlineAccessInfoId String?           @unique
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
@@ -49,4 +45,5 @@ model AssociatedUser {
   locale             String
   collaborator       Boolean
   emailVerified      Boolean
+  onlineAccessInfo   OnlineAccessInfo? @relation(fields: [onlineAccessInfoId], references: [id])
 }

@@ -1,4 +1,4 @@
-api_version = "2024-10"
+api_version = "2024-07"
 
 [[extensions]]
 type = "ui_extension"
@@ -10,8 +10,9 @@ target = "purchase.checkout.block.render"
 module = "./src/Checkout.tsx"
 
 [extensions.capabilities]
-network_access = true
+# network_access = true  # 临时注释掉这行
 block_progress = true
+
 
 [extensions.settings]
 [[extensions.settings.fields]]

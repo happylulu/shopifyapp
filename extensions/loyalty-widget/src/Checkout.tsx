@@ -9,9 +9,6 @@ import {
   SkeletonText,
   useSettings,
   useCustomer,
-  useApi,
-  useApplyCartLinesChange,
-  useCartLines,
   useShop,
 } from '@shopify/ui-extensions-react/checkout';
 
@@ -42,9 +39,6 @@ function LoyaltyWidget() {
   const { title, show_points, show_tier, show_rewards } = useSettings();
   const customer = useCustomer();
   const shop = useShop();
-  const { query } = useApi();
-  const applyCartLinesChange = useApplyCartLinesChange();
-  const cartLines = useCartLines();
 
   const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltyProfile | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -74,80 +68,30 @@ function LoyaltyWidget() {
   const loadLoyaltyData = async () => {
     try {
       setLoading(true);
-
-      // Enhanced GraphQL query with fragments
-      const loyaltyQuery = `
-        fragment TierInfo on Tier {
-          id
-          name
-          level
-          min_points_required
-          description
-          benefits
-          icon_url
-          color
-        }
-
-        fragment RewardInfo on Reward {
-          id
-          name
-          description
-          points_cost
-          reward_type
-          value
-          image_url
-          category
-          available
-          terms_and_conditions
-          expires_at
-        }
-
-        query GetLoyaltyProfile($customerId: String!) {
-          loyaltyProfile(customerId: $customerId) {
-            id
-            customer_id
-            points_balance
-            lifetime_points
-            current_tier {
-              ...TierInfo
-            }
-            next_tier {
-              ...TierInfo
-            }
-            points_to_next_tier
-            tier_progress_percentage
-            member_since
-            last_activity
-          }
-          availableRewards(customerId: $customerId, maxPoints: 2000) {
-            ...RewardInfo
-          }
-          earningOpportunities(customerId: $customerId) {
-            action
-            points
-            description
-            url
-            available
-          }
-        }
-      `;
-
-      const response = await query(loyaltyQuery, {
-        variables: { customerId: customer?.id },
+      
+      // Use your backend API instead of Shopify's GraphQL
+      const apiUrl = 'https://loyalbee-dev.ngrok-free.app/api/loyalty/profile';
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
         headers: {
-          'X-Shopify-Shop-Domain': shop?.myshopifyDomain || shop?.domain,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'X-Shopify-Shop-Domain': shop?.myshopifyDomain || shop?.domain || '',
+        },
+        body: JSON.stringify({
+          customer_id: customer?.id,
+          customer_email: customer?.email,
+        }),
       });
 
-      if (response.data) {
-        setLoyaltyProfile(response.data.loyaltyProfile);
-        setRewards(response.data.availableRewards || []);
-
-        // Calculate points that will be earned from current cart
-        const cartPoints = calculateCartPoints();
-        setEarnedPoints(cartPoints);
+      if (!response.ok) {
+        throw new Error('Failed to fetch loyalty data');
       }
+
+      const data = await response.json();
+      setLoyaltyProfile(data.profile);
+      setRewards(data.rewards || []);
+      
     } catch (err) {
       setError('Failed to load loyalty data');
       console.error('Loyalty data error:', err);

@@ -1031,15 +1031,107 @@ async def purge_shop_data(shop_domain: str) -> None:
 
 @app.post("/webhooks/app_uninstalled")
 async def app_uninstalled(request: Request):
-    """Handle Shopify APP_UNINSTALLED webhook and purge merchant data."""
-    shop_domain = get_shop_domain(request)
-    await purge_shop_data(shop_domain)
-    return {"success": True}
+    """Handle app uninstallation webhook"""
+    try:
+        shop_domain = request.headers.get("x-shopify-shop-domain")
+        if shop_domain:
+            # Clean up shop data when app is uninstalled
+            await purge_shop_data(shop_domain)
+            print(f"✅ Cleaned up data for uninstalled shop: {shop_domain}")
+        
+        return {"success": True}
+    except Exception as e:
+        print(f"❌ Error handling app uninstall: {str(e)}")
+        return {"success": False, "error": str(e)}
 
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "version": "1.0.0"}
+@app.post("/api/webhooks/orders/paid")
+async def orders_paid_webhook(
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+):
+    """Handle Shopify orders/paid webhook to automatically award loyalty points"""
+    try:
+        # Log incoming request headers for debugging
+        print(f"🔍 [Orders Webhook] Headers: {dict(request.headers)}")
+        
+        # Get the webhook payload
+        payload = await request.json()
+        
+        print(f"🔍 [Orders Webhook] Received order paid webhook: {payload.get('id', 'unknown')}")
+        print(f"🔍 [Orders Webhook] Order total: ${payload.get('total_price', 0)}")
+        
+        # Extract order information
+        order_id = str(payload.get("id", ""))
+        order_number = payload.get("order_number", "")
+        total_price = float(payload.get("total_price", 0))
+        customer_data = payload.get("customer", {})
+        
+        if not customer_data:
+            print("⚠️ [Orders Webhook] No customer data in order - skipping loyalty points")
+            return {"success": True, "message": "No customer data"}
+        
+        customer_id = str(customer_data.get("id", ""))
+        customer_email = customer_data.get("email", "")
+        customer_first_name = customer_data.get("first_name", "")
+        customer_last_name = customer_data.get("last_name", "")
+        
+        # Calculate points (1 point per dollar spent)
+        points_to_award = int(total_price)
+        
+        print(f"🔍 [Orders Webhook] Order ${total_price} for {customer_email} → {points_to_award} points")
+        
+        # Get shop domain from headers or payload
+        shop_domain = request.headers.get("x-shopify-shop-domain") or "petcocolulu.myshopify.com"
+        
+        # Get or create shop record
+        result = await session.execute(select(Shop).where(Shop.shop_domain == shop_domain))
+        shop = result.scalar_one_or_none()
+        
+        if not shop:
+            print(f"🔍 [Orders Webhook] Creating shop record for {shop_domain}")
+            shop = Shop(shop_domain=shop_domain)
+            session.add(shop)
+            await session.commit()
+            await session.refresh(shop)
+        
+        # Get or create customer loyalty profile
+        profile = await loyalty_service.get_profile(session, shop.id, customer_id)
+        
+        if not profile:
+            print(f"🔍 [Orders Webhook] Creating loyalty profile for {customer_email}")
+            profile = await loyalty_service.create_profile(
+                session,
+                shop.id,
+                customer_id,
+                email=customer_email,
+                first_name=customer_first_name,
+                last_name=customer_last_name
+            )
+        
+        # Award points
+        updated_profile = await loyalty_service.adjust_points(
+            session, 
+            profile, 
+            points_to_award, 
+            f"Order #{order_number} - ${total_price}"
+        )
+        
+        print(f"✅ [Orders Webhook] Awarded {points_to_award} points to {customer_email}. New balance: {updated_profile.points_balance}")
+        
+        return {
+            "success": True,
+            "customer_email": customer_email,
+            "points_awarded": points_to_award,
+            "new_balance": updated_profile.points_balance,
+            "order_id": order_id,
+            "processed_at": datetime.now().isoformat(),
+        }
+        
+    except Exception as e:
+        print(f"❌ [Orders Webhook] Error processing order webhook: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

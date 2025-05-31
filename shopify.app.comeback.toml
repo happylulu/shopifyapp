@@ -22,14 +22,6 @@ api_version = "2025-04"
   uri = "/api/webhooks/customers/create"
 
   [[webhooks.subscriptions]]
-  topics = [ "customers/data_request" ]
-  uri = "/api/webhooks/customers/data_request"
-
-  [[webhooks.subscriptions]]
-  topics = [ "customers/redact" ]
-  uri = "/api/webhooks/customers/redact"
-
-  [[webhooks.subscriptions]]
   topics = [ "orders/paid" ]
   uri = "/api/webhooks/orders/paid"
 
@@ -37,13 +29,9 @@ api_version = "2025-04"
   topics = [ "refunds/create" ]
   uri = "/api/webhooks/refunds/create"
 
-  [[webhooks.subscriptions]]
-  topics = [ "shop/redact" ]
-  uri = "/api/webhooks/shop/redact"
-
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_orders,read_products,write_orders"
+scopes = "write_products,read_customers,write_customers,read_orders,write_orders"
 
 [auth]
 redirect_urls = [

@@ -22,7 +22,7 @@ export default function DashboardClient() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("http://localhost:8000/dashboard/overview");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/dashboard/overview`);
         const json = await res.json();
         console.log("Dashboard data received:", json); // Debug log
         setData(json);
